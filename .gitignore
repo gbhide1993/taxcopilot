@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Env
+.env
+venv/
+.venv/
+
+# Docker
+*.log
+
+# VSCode
+.vscode/
+
+# Mac
+.DS_Store
+
+# Alembic cache
+alembic/versions/*.pyc
+
+# Data files
+*.csv
+*.xlsx
+*.docx

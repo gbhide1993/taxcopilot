@@ -1,0 +1,29 @@
+services:
+  db:
+    image: ankane/pgvector
+    container_name: taxcopilot_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: strongpass123
+      POSTGRES_DB: taxcopilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # ✅ for data persistence
+
+  backend:
+    build: .
+    container_name: taxcopilot_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:strongpass123@db:5432/taxcopilot
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app  # ✅ for document uploads
+
+volumes:
+  pgdata:
