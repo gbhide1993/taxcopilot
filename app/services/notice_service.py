@@ -116,13 +116,34 @@ def classify_notice(text: str):
     }
 
 
-def list_notices(db: Session, user_id: int, status: NoticeStatus = None):
+def list_notices(
+    db: Session,
+    user_id: int,
+    status: NoticeStatus = None,
+    page: int = 1,
+    page_size: int = 10,
+):
     query = db.query(Notice).filter(Notice.created_by == user_id)
 
     if status:
         query = query.filter(Notice.status == status)
 
-    return query.all()
+    total = query.count()
+
+    notices = (
+        query
+        .order_by(Notice.id.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    return {
+        "items": notices,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
 
 def update_notice_status(db: Session, notice_id: int, status, user_id: int):

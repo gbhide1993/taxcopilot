@@ -111,14 +111,21 @@ def upload_notice(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=list[NoticeResponse])
+@router.get("/")
 def get_notices(
     status: NoticeStatus = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    return list_notices(db, current_user.id, status)
-
+    return list_notices(
+        db=db,
+        user_id=current_user.id,
+        status=status,
+        page=page,
+        page_size=page_size,
+    )
 
 @router.put("/{notice_id}/status", response_model=NoticeResponse)
 def change_status(

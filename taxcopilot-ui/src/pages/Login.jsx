@@ -6,17 +6,22 @@ const Login = () => {
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
-    try {
-      const response = await api.post("/login", values);
+  try {
+    const response = await api.post("/login", null, {
+      params: {
+        email: values.email,
+        password: values.password,
+      },
+    });
 
-      localStorage.setItem("access_token", response.data.access_token);
+    localStorage.setItem("access_token", response.data.access_token);
 
-      message.success("Login successful");
-      navigate("/");
+        message.success("Login successful");
+        navigate("/");
     } catch (error) {
-      message.error("Invalid credentials");
+        message.error("Invalid credentials");
     }
-  };
+    };
 
   return (
     <div style={{ display: "flex", height: "100vh", justifyContent: "center", alignItems: "center" }}>

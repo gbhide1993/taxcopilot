@@ -17,7 +17,6 @@ import api from "../api/axios";
 import dayjs from "dayjs";
 import { getStatusTag } from "../utils/statusUtils";
 
-
 const { RangePicker } = DatePicker;
 
 const Notices = () => {
@@ -25,46 +24,34 @@ const Notices = () => {
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [clientMap, setClientMap] = useState({});
+  const [userMap, setUserMap] = useState({});
 
-  const columns = [
-    { title: "Notice Number", dataIndex: "notice" },
-    { title: "Client", dataIndex: "client" },
-    { title: "Section", dataIndex: "section" },
-    { title: "Due Date", dataIndex: "dueDate" },
-    { title: "Risk Score", dataIndex: "risk" },
-    
-    {
-    title: "Status",
-    dataIndex: "status",
-    render: (status) => {
-        const { label, color } = getStatusTag(status);
-        return <Tag color={color}>{label}</Tag>;
-  },
-},
-    
-    { title: "Assigned To", dataIndex: "assigned" },
-  ];
-
-  
-
-  useEffect(() => {
-  fetchNotices();
+useEffect(() => {
+  fetchData();
 }, []);
 
-const fetchNotices = async () => {
+const fetchData = async () => {
   try {
     setLoading(true);
-    const response = await api.get("/notices");
 
-    const formatted = response.data.map((item) => ({
+    const clientsRes = await api.get("/clients");
+    const noticesRes = await api.get("/notices");
+
+    const clientMapping = {};
+    clientsRes.data.forEach((client) => {
+      clientMapping[client.id] = client.name;
+    });
+
+    const formatted = noticesRes.data.map((item) => ({
       key: item.id,
       notice: item.notice_number,
-      client: `Client #${item.client_id}`,
-      section: item.section_reference,
+      client: clientMapping[item.client_id] || "—",
+      section: item.section_reference || "—",
       dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
       risk: 0,
       status: item.status,
-      assigned: `User #${item.assigned_to}`,
+      assigned: item.assigned_to || "Unassigned",
       raw: item,
     }));
 
@@ -76,6 +63,45 @@ const fetchNotices = async () => {
   }
 };
 
+  const fetchNotices = async (clientMapping, userMapping) => {
+    try {
+      const response = await api.get("/notices");
+
+      const formatted = response.data.map((item) => ({
+        key: item.id,
+        notice: item.notice_number,
+        client: clientMapping[item.client_id] || "—",
+        section: item.section_reference || "—",
+        dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
+        risk: 0,
+        status: item.status,
+        assigned: userMapping[item.assigned_to] || "Unassigned",
+        raw: item,
+      }));
+
+      setData(formatted);
+    } catch (error) {
+      console.error("Error fetching notices:", error);
+    }
+  };
+
+  const columns = [
+    { title: "Notice Number", dataIndex: "notice" },
+    { title: "Client", dataIndex: "client" },
+    { title: "Section", dataIndex: "section" },
+    { title: "Due Date", dataIndex: "dueDate" },
+    { title: "Risk Score", dataIndex: "risk" },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (status) => {
+        const { label, color } = getStatusTag(status);
+        return <Tag color={color}>{label}</Tag>;
+      },
+    },
+    { title: "Assigned To", dataIndex: "assigned" },
+  ];
+
   return (
     <div>
       {/* Filter Section */}
@@ -86,7 +112,8 @@ const fetchNotices = async () => {
               <Form.Item label="Status">
                 <Select placeholder="Select status" allowClear>
                   <Select.Option value="open">Open</Select.Option>
-                  <Select.Option value="overdue">Overdue</Select.Option>
+                  <Select.Option value="in_progress">In Progress</Select.Option>
+                  <Select.Option value="replied">Replied</Select.Option>
                   <Select.Option value="closed">Closed</Select.Option>
                 </Select>
               </Form.Item>
@@ -140,7 +167,7 @@ const fetchNotices = async () => {
       <Drawer
         title="Notice Details"
         placement="right"
-        width={720}
+        size="large"
         onClose={() => setOpen(false)}
         open={open}
       >
@@ -166,23 +193,6 @@ const fetchNotices = async () => {
                 {selectedNotice.assigned}
               </Descriptions.Item>
             </Descriptions>
-
-            <div style={{ marginTop: 24 }}>
-              <h4>Draft Versions</h4>
-              <p>Version 1 - Generated on 10 Mar 2026</p>
-              <p>Version 2 - Generated on 15 Mar 2026</p>
-            </div>
-
-            <div style={{ marginTop: 24 }}>
-              <h4>Appeal Versions</h4>
-              <p>No appeals generated yet.</p>
-            </div>
-
-            <div style={{ marginTop: 24 }}>
-              <h4>Risk Metadata</h4>
-              <p>Late filing history detected.</p>
-              <p>High variance in declared income.</p>
-            </div>
           </>
         )}
       </Drawer>

@@ -18,6 +18,8 @@ services:
     restart: always
     depends_on:
       - db
+    env_file:
+     - .env
     environment:
       DATABASE_URL: postgresql://postgres:strongpass123@db:5432/taxcopilot
     ports:
