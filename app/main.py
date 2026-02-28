@@ -10,9 +10,13 @@ from app.routes import clients, notices, documents, search, rag, system, users, 
 from app.dependencies.license_guard import check_license
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+origins = [
+    "http://localhost:5173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

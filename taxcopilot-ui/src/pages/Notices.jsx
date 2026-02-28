@@ -15,12 +15,16 @@ import {
 import { useState, useEffect } from "react";
 import api from "../api/axios";
 import dayjs from "dayjs";
+import { getStatusTag } from "../utils/statusUtils";
+
 
 const { RangePicker } = DatePicker;
 
 const Notices = () => {
   const [open, setOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const columns = [
     { title: "Notice Number", dataIndex: "notice" },
@@ -28,27 +32,20 @@ const Notices = () => {
     { title: "Section", dataIndex: "section" },
     { title: "Due Date", dataIndex: "dueDate" },
     { title: "Risk Score", dataIndex: "risk" },
+    
     {
-      title: "Status",
-      dataIndex: "status",
-      render: (status) => {
-        if (status === "open")
-            return <Tag color="blue">Open</Tag>;
-        if (status === "in_progress")
-            return <Tag color="orange">In Progress</Tag>;
-        if (status === "replied")
-            return <Tag color="yellow">Replied</Tag>;
-        if (status === "closed")
-            return <Tag color="green">Closed</Tag>;
-        return <Tag>{status}</Tag>;
-        
-        
-      },
-    },
+    title: "Status",
+    dataIndex: "status",
+    render: (status) => {
+        const { label, color } = getStatusTag(status);
+        return <Tag color={color}>{label}</Tag>;
+  },
+},
+    
     { title: "Assigned To", dataIndex: "assigned" },
   ];
 
-  const [data, setData] = useState([]);
+  
 
   useEffect(() => {
   fetchNotices();
@@ -56,23 +53,26 @@ const Notices = () => {
 
 const fetchNotices = async () => {
   try {
+    setLoading(true);
     const response = await api.get("/notices");
 
     const formatted = response.data.map((item) => ({
       key: item.id,
       notice: item.notice_number,
-      client: item.client_id,
+      client: `Client #${item.client_id}`,
       section: item.section_reference,
       dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
-      risk: 0, // will connect risk engine later
+      risk: 0,
       status: item.status,
-      assigned: item.assigned_to,
+      assigned: `User #${item.assigned_to}`,
       raw: item,
     }));
 
     setData(formatted);
   } catch (error) {
     console.error("Error fetching notices:", error);
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -125,6 +125,7 @@ const fetchNotices = async () => {
         <Table
           columns={columns}
           dataSource={data}
+          loading={loading}
           size="small"
           onRow={(record) => ({
             onClick: () => {
