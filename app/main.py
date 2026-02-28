@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends
 from dotenv import load_dotenv
 from sqlalchemy import text
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.database import Base, engine
 from app.models.user import User
 from app.dependencies.auth import get_current_user
@@ -8,8 +10,12 @@ from app.routes import auth
 from app.models import user, client, notice, document, document_chunk
 from app.routes import clients, notices, documents, search, rag, system, users, sections, drafts, risk, dashboard, appeals
 from app.dependencies.license_guard import check_license
-from fastapi.middleware.cors import CORSMiddleware
-app = FastAPI()
+
+
+load_dotenv()
+
+app = FastAPI(title="Private Tax Notice Copilot")
+
 origins = [
     "http://localhost:5173",
 ]
@@ -23,9 +29,9 @@ app.add_middleware(
 )
 
 
-load_dotenv()
 
-app = FastAPI(title="Private Tax Notice Copilot")
+
+
 
 app.include_router(auth.router)
 

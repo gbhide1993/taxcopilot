@@ -20,12 +20,18 @@ import Appeals from "./pages/Appeals";
 import RiskMonitor from "./pages/RiskMonitor";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Login from "./pages/Login";
 
 const { Header, Sider, Content } = Layout;
 
 const LayoutWrapper = () => {
+  const token = localStorage.getItem("access_token");
   const navigate = useNavigate();
   const location = useLocation();
+
+  if (!token && location.pathname !== "/login") {
+  navigate("/login");
+}
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -80,6 +86,7 @@ const LayoutWrapper = () => {
             <Route path="/risk" element={<RiskMonitor />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </Content>
       </Layout>
