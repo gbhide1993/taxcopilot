@@ -8,7 +8,15 @@ from app.routes import auth
 from app.models import user, client, notice, document, document_chunk
 from app.routes import clients, notices, documents, search, rag, system, users, sections, drafts, risk, dashboard, appeals
 from app.dependencies.license_guard import check_license
-
+from fastapi.middleware.cors import CORSMiddleware
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 load_dotenv()
