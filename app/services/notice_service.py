@@ -5,6 +5,8 @@ from app.services.llm_service import generate_answer
 from sqlalchemy.orm import Session
 from app.models.notice import Notice, NoticeStatus
 from app.services.risk_service import calculate_and_store_risk
+from datetime import date
+
 
 def create_notice(
     db: Session,
@@ -120,6 +122,10 @@ def list_notices(
     db: Session,
     user_id: int,
     status: NoticeStatus = None,
+    section: str = None,
+    client_id: int = None,
+    from_date: date = None,
+    to_date: date = None,
     page: int = 1,
     page_size: int = 10,
 ):
@@ -127,6 +133,18 @@ def list_notices(
 
     if status:
         query = query.filter(Notice.status == status)
+
+    if section:
+        query = query.filter(Notice.section_reference.ilike(f"%{section}%"))
+
+    if client_id:
+        query = query.filter(Notice.client_id == client_id)
+
+    if from_date:
+        query = query.filter(Notice.due_date >= from_date)
+
+    if to_date:
+        query = query.filter(Notice.due_date <= to_date)
 
     total = query.count()
 

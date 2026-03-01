@@ -11,11 +11,13 @@ import {
   Col,
   Drawer,
   Descriptions,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import api from "../api/axios";
 import dayjs from "dayjs";
 import { getStatusTag } from "../utils/statusUtils";
+import { Dropdown } from "antd";
 
 const { RangePicker } = DatePicker;
 
@@ -24,50 +26,35 @@ const Notices = () => {
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [clientMap, setClientMap] = useState({});
-  const [userMap, setUserMap] = useState({});
 
-useEffect(() => {
-  fetchData();
-}, []);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
 
-const fetchData = async () => {
-  try {
-    setLoading(true);
+  useEffect(() => {
+    fetchData(page, pageSize);
+  }, [page, pageSize]);
 
-    const clientsRes = await api.get("/clients");
-    const noticesRes = await api.get("/notices");
-
-    const clientMapping = {};
-    clientsRes.data.forEach((client) => {
-      clientMapping[client.id] = client.name;
-    });
-
-    const formatted = noticesRes.data.map((item) => ({
-      key: item.id,
-      notice: item.notice_number,
-      client: clientMapping[item.client_id] || "—",
-      section: item.section_reference || "—",
-      dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
-      risk: 0,
-      status: item.status,
-      assigned: item.assigned_to || "Unassigned",
-      raw: item,
-    }));
-
-    setData(formatted);
-  } catch (error) {
-    console.error("Error fetching notices:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const fetchNotices = async (clientMapping, userMapping) => {
+  const fetchData = async (pageParam, pageSizeParam) => {
     try {
-      const response = await api.get("/notices");
+      setLoading(true);
 
-      const formatted = response.data.map((item) => ({
+      const [clientsRes, noticesRes] = await Promise.all([
+        api.get("/clients"),
+        api.get("/notices", {
+          params: {
+            page: pageParam,
+            page_size: pageSizeParam,
+          },
+        }),
+      ]);
+
+      const clientMapping = {};
+      clientsRes.data.forEach((client) => {
+        clientMapping[client.id] = client.name;
+      });
+
+      const formatted = noticesRes.data.items.map((item) => ({
         key: item.id,
         notice: item.notice_number,
         client: clientMapping[item.client_id] || "—",
@@ -75,15 +62,46 @@ const fetchData = async () => {
         dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
         risk: 0,
         status: item.status,
-        assigned: userMapping[item.assigned_to] || "Unassigned",
+        assigned: item.assigned_to || "Unassigned",
         raw: item,
       }));
 
       setData(formatted);
+      setTotal(noticesRes.data.total);
+
     } catch (error) {
       console.error("Error fetching notices:", error);
+      message.error("Failed to load notices");
+    } finally {
+      setLoading(false);
     }
   };
+
+const handleStatusChange = async (noticeId, newStatus) => {
+  try {
+    await api.patch(`/notices/${noticeId}/status`, {
+      status: newStatus,
+    });
+
+    message.success(`Status updated to ${newStatus}`);
+
+    // Optimistic UI update
+    setData((prev) =>
+      prev.map((item) =>
+        item.raw.id === noticeId
+          ? {
+              ...item,
+              status: newStatus,
+              raw: { ...item.raw, status: newStatus },
+            }
+          : item
+      )
+    );
+
+  } catch (error) {
+    message.error("Failed to update status");
+  }
+};
 
   const columns = [
     { title: "Notice Number", dataIndex: "notice" },
@@ -100,11 +118,46 @@ const fetchData = async () => {
       },
     },
     { title: "Assigned To", dataIndex: "assigned" },
+    
+
+    {
+    title: "Actions",
+    render: (_, record) => {
+        const statusOptions = [
+        { key: "open", label: "Open" },
+        { key: "in_progress", label: "In Progress" },
+        { key: "replied", label: "Replied" },
+        { key: "closed", label: "Closed" },
+        ];
+
+        const menuItems = statusOptions
+        .filter(option => option.key !== record.status)
+        .map(option => ({
+            key: option.key,
+            label: option.label,
+        }));
+
+        return (
+        <Dropdown
+            menu={{
+            items: menuItems,
+            onClick: ({ key }) => {
+                handleStatusChange(record.raw.id, key);
+            },
+            }}
+        >
+            <Button type="link">
+            Change Status
+            </Button>
+        </Dropdown>
+        );
+    },
+    }
   ];
 
   return (
     <div>
-      {/* Filter Section */}
+      {/* Filter Section (UI only for now) */}
       <Card size="small" style={{ marginBottom: 16 }}>
         <Form layout="vertical">
           <Row gutter={16}>
@@ -154,6 +207,17 @@ const fetchData = async () => {
           dataSource={data}
           loading={loading}
           size="small"
+          pagination={{
+            current: page,
+            pageSize: pageSize,
+            total: total,
+            showSizeChanger: true,
+            pageSizeOptions: ["5", "10", "20", "50"],
+            onChange: (newPage, newPageSize) => {
+              setPage(newPage);
+              setPageSize(newPageSize);
+            },
+          }}
           onRow={(record) => ({
             onClick: () => {
               setSelectedNotice(record);
@@ -172,28 +236,26 @@ const fetchData = async () => {
         open={open}
       >
         {selectedNotice && (
-          <>
-            <Descriptions bordered column={1} size="small">
-              <Descriptions.Item label="Notice Number">
-                {selectedNotice.notice}
-              </Descriptions.Item>
-              <Descriptions.Item label="Client">
-                {selectedNotice.client}
-              </Descriptions.Item>
-              <Descriptions.Item label="Section">
-                {selectedNotice.section}
-              </Descriptions.Item>
-              <Descriptions.Item label="Due Date">
-                {selectedNotice.dueDate}
-              </Descriptions.Item>
-              <Descriptions.Item label="Risk Score">
-                {selectedNotice.risk}
-              </Descriptions.Item>
-              <Descriptions.Item label="Assigned To">
-                {selectedNotice.assigned}
-              </Descriptions.Item>
-            </Descriptions>
-          </>
+          <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label="Notice Number">
+              {selectedNotice.notice}
+            </Descriptions.Item>
+            <Descriptions.Item label="Client">
+              {selectedNotice.client}
+            </Descriptions.Item>
+            <Descriptions.Item label="Section">
+              {selectedNotice.section}
+            </Descriptions.Item>
+            <Descriptions.Item label="Due Date">
+              {selectedNotice.dueDate}
+            </Descriptions.Item>
+            <Descriptions.Item label="Risk Score">
+              {selectedNotice.risk}
+            </Descriptions.Item>
+            <Descriptions.Item label="Assigned To">
+              {selectedNotice.assigned}
+            </Descriptions.Item>
+          </Descriptions>
         )}
       </Drawer>
     </div>

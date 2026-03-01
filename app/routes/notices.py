@@ -110,10 +110,13 @@ def upload_notice(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @router.get("/")
 def get_notices(
     status: NoticeStatus = Query(None),
+    section: str = Query(None),
+    client_id: int = Query(None),
+    from_date: date = Query(None),
+    to_date: date = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -123,6 +126,10 @@ def get_notices(
         db=db,
         user_id=current_user.id,
         status=status,
+        section=section,
+        client_id=client_id,
+        from_date=from_date,
+        to_date=to_date,
         page=page,
         page_size=page_size,
     )
