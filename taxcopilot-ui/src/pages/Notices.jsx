@@ -43,6 +43,7 @@ const Notices = () => {
     client_id: null,
     from_date: null,
     to_date: null,
+    risk_level: null,
   });
 
   useEffect(() => {
@@ -62,6 +63,7 @@ const Notices = () => {
             page_size: pageSizeParam,
             status: activeFilters.status || undefined,
             section: activeFilters.section || undefined,
+            risk_level: activeFilters.risk_level || undefined,
             client_id: activeFilters.client_id || undefined,
             from_date: activeFilters.from_date || undefined,
             to_date: activeFilters.to_date || undefined,
@@ -93,7 +95,7 @@ const Notices = () => {
         dueDate: item.due_date
           ? dayjs(item.due_date).format("DD MMM YYYY")
           : "—",
-        risk: item.risk_score ?? 0,
+        risk_score: item.risk_score ?? 0,
         status: item.status,
         assigned: item.assigned_to
           ? userMapping[item.assigned_to] || "Unknown"
@@ -217,7 +219,7 @@ const handleRiskCalculation = async (noticeId) => {
         item.raw.id === noticeId
           ? {
               ...item,
-              risk: score,
+              risk_score: score,
               raw: { ...item.raw, risk_score: score },
             }
           : item
@@ -310,19 +312,11 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
     { title: "Due Date", dataIndex: "dueDate" },
     {
     title: "Risk Score",
-    dataIndex: "risk",
-    sorter: (a, b) => (a.risk || 0) - (b.risk || 0),
-    sortDirections: ["descend", "ascend"],
+    dataIndex: "risk_score",
+    sorter: (a, b) =>
+        (a.risk_score || 0) - (b.risk_score || 0),
     defaultSortOrder: "descend",
-    render: (risk) => {
-        if (risk == null) return "—";
-
-        let color = "green";
-        if (risk >= 4) color = "red";
-        else if (risk >= 2.5) color = "orange";
-
-        return <Tag color={color}>{risk}</Tag>;
-    },
+    render: (risk) => risk ?? "—",
     },
     {
       title: "Status",
@@ -376,7 +370,9 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
               },
             }}
           >
-            <Button type="link">Actions</Button>
+            <Button size="small" type="primary">
+              Actions
+            </Button>
           </Dropdown>
         );
       },
@@ -460,6 +456,22 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
                 />
               </Form.Item>
             </Col>
+            
+            <Col span={4}>
+            <Form.Item label="Risk Level">
+                <Select
+                allowClear
+                value={filters.risk_level}
+                onChange={(value) =>
+                    setFilters((prev) => ({ ...prev, risk_level: value }))
+                }
+                >
+                <Select.Option value="high">High (4+)</Select.Option>
+                <Select.Option value="medium">Medium (2.5+)</Select.Option>
+                <Select.Option value="low">Low (1+)</Select.Option>
+                </Select>
+            </Form.Item>
+            </Col>
 
             <Col span={4} style={{ display: "flex", alignItems: "end" }}>
               <Button
@@ -518,6 +530,14 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
               fetchNoticeDetail(record.raw.id);
             },
           })}
+         rowClassName={(record) => {
+            const risk = record.risk_score ?? 0;
+
+            if (risk >= 4) return "row-critical";
+            if (risk >= 3) return "row-high-risk";
+            if (risk >= 2) return "row-medium-risk";
+            return "";
+            }}
         />
       </Card>
 

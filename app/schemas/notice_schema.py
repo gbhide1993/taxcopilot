@@ -32,6 +32,7 @@ class NoticeResponse(BaseModel):
     section_reference: str | None
     assessment_year: str | None
     description: str | None
+    risk_score: float | None = None
     received_date: date
     due_date: date
     status: str

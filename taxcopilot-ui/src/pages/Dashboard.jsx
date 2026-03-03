@@ -1,108 +1,93 @@
 import { Card, Row, Col, Table, Tag } from "antd";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
+import dayjs from "dayjs";
 
 const Dashboard = () => {
-  const stats = [
-    { title: "Total Active Notices", value: 24 },
-    { title: "Overdue Notices", value: 5 },
-    { title: "High Risk Notices", value: 7 },
-    { title: "Draft Pending", value: 4 },
-    { title: "Appeals Pending", value: 2 },
-    { title: "Closed This Month", value: 12 },
-  ];
+  const [stats, setStats] = useState(null);
+  const [topNotices, setTopNotices] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/risk/monitor");
+
+      setStats(res.data);
+
+      setTopNotices(
+        (res.data.top_notices || []).map((item) => ({
+          key: item.notice_id,
+          notice: item.notice_number,
+          dueDate: item.due_date
+            ? dayjs(item.due_date).format("DD MMM YYYY")
+            : "—",
+          risk: item.risk_score,
+        }))
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns = [
     { title: "Notice Number", dataIndex: "notice" },
-    { title: "Client", dataIndex: "client" },
-    { title: "Section", dataIndex: "section" },
     { title: "Due Date", dataIndex: "dueDate" },
-    { title: "Days Remaining", dataIndex: "daysRemaining" },
-    { title: "Risk Score", dataIndex: "risk" },
     {
-      title: "Status",
-      dataIndex: "status",
-      render: (status) => {
-        if (status === "Overdue") return <Tag color="red">Overdue</Tag>;
-        if (status === "High Risk") return <Tag color="orange">High Risk</Tag>;
-        return <Tag color="green">{status}</Tag>;
+      title: "Risk Score",
+      dataIndex: "risk",
+      render: (risk) => {
+        if (risk >= 4) return <Tag color="red">{risk.toFixed(2)}</Tag>;
+        if (risk >= 2.5) return <Tag color="orange">{risk.toFixed(2)}</Tag>;
+        return <Tag color="green">{risk.toFixed(2)}</Tag>;
       },
     },
-    { title: "Assigned To", dataIndex: "assigned" },
-    {
-  title: "Actions",
-  render: () => (
-    <>
-      <a style={{ marginRight: 12 }}>Draft</a>
-      <a style={{ marginRight: 12 }}>Appeal</a>
-      <a>Close</a>
-    </>
-  ),
-},
   ];
 
-  const data = [
-    {
-      key: 1,
-      notice: "N-101",
-      client: "ABC Pvt Ltd",
-      section: "143(2)",
-      dueDate: "25 Mar 2026",
-      daysRemaining: -3,
-      risk: 82,
-      status: "Overdue",
-      assigned: "Rahul",
-    },
-    {
-      key: 2,
-      notice: "N-102",
-      client: "XYZ Traders",
-      section: "148",
-      dueDate: "02 Apr 2026",
-      daysRemaining: 5,
-      risk: 75,
-      status: "High Risk",
-      assigned: "Priya",
-    },
-    {
-      key: 3,
-      notice: "N-103",
-      client: "MNO LLP",
-      section: "133(6)",
-      dueDate: "10 Apr 2026",
-      daysRemaining: 12,
-      risk: 40,
-      status: "Open",
-      assigned: "Amit",
-    },
+  const statCards = [
+    { title: "Total Notices", value: stats?.total || 0 },
+    { title: "High Risk", value: stats?.high || 0, color: "red" },
+    { title: "Medium Risk", value: stats?.medium || 0, color: "orange" },
+    { title: "Low Risk", value: stats?.low || 0, color: "green" },
+    { title: "Overdue + High", value: stats?.overdue_high || 0, color: "crimson" },
   ];
 
   return (
     <div>
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-  {stats.map((item, index) => (
-    <Col span={4} key={index}>
-      <Card
-        size="small"
-        hoverable
-        onClick={() => console.log(item.title)}
-        style={{ cursor: "pointer" }}
-      >
-        <div style={{ fontSize: 20, fontWeight: 600 }}>
-          {item.value}
-        </div>
-        <div style={{ fontSize: 13, color: "#666" }}>
-          {item.title}
-        </div>
-      </Card>
-    </Col>
-  ))}
-</Row>
+        {statCards.map((item, index) => (
+          <Col span={4} key={index}>
+            <Card size="small" hoverable>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  color: item.color || "#000",
+                }}
+              >
+                {item.value}
+              </div>
+              <div style={{ fontSize: 13, color: "#666" }}>
+                {item.title}
+              </div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
-      <Card size="small" title="Work Queue">
+      <Card size="small" title="Top Risky Notices">
         <Table
           columns={columns}
-          dataSource={data}
+          dataSource={topNotices}
           pagination={false}
           size="small"
+          loading={loading}
         />
       </Card>
     </div>

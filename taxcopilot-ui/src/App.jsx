@@ -22,6 +22,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 
+
 const { Header, Sider, Content } = Layout;
 
 const LayoutWrapper = () => {
@@ -87,6 +88,7 @@ const LayoutWrapper = () => {
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/risk-monitor" element={<RiskMonitor />} />
           </Routes>
         </Content>
       </Layout>

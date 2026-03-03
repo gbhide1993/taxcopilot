@@ -1,3 +1,4 @@
+/*
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -54,6 +55,23 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+
+.ant-table-tbody > tr.row-critical > td {
+  background-color: #f1bcbd !important;
+  color: black !important;
+}
+
+
+.ant-table-tbody > tr.row-high-risk > td {
+  background-color: #f6d5b1 !important;
+  color: black !important;
+}
+
+
+.ant-table-tbody > tr.row-medium-risk > td {
+  background-color: #f3e4bd !important;
+  color: black !important;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -65,4 +83,23 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+*/
+
+/* CRITICAL */
+.ant-table-wrapper .ant-table-tbody > tr.row-critical > td {
+  background-color: #fe8a8c !important;
+  color: black !important;
+}
+
+/* HIGH */
+.ant-table-wrapper .ant-table-tbody > tr.row-high-risk > td {
+  background-color: #f6b36c !important;
+  color: black !important;
+}
+
+/* MEDIUM */
+.ant-table-wrapper .ant-table-tbody > tr.row-medium-risk > td {
+  background-color: #f6de9d !important;
+  color: black !important;
 }

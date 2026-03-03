@@ -7,6 +7,7 @@ from app.models.notice import Notice, NoticeStatus
 from app.services.risk_service import calculate_and_store_risk
 from app.models.notice_risk_metadata import NoticeRiskMetadata
 from datetime import date
+from sqlalchemy.orm import aliased
 
 
 def create_notice(
@@ -118,7 +119,6 @@ def classify_notice(text: str):
         "assessment_year": assessment_year
     }
 
-
 def list_notices(
     db: Session,
     user_id: int,
@@ -127,49 +127,89 @@ def list_notices(
     client_id: int = None,
     from_date: date = None,
     to_date: date = None,
-    min_risk: float = None,
+    risk_level: str = None,
     page: int = 1,
     page_size: int = 10,
 ):
-    query = db.query(Notice).filter(Notice.created_by == user_id)
+    risk_alias = aliased(NoticeRiskMetadata)
 
+    base_query = (
+        db.query(
+            Notice,
+            risk_alias.risk_score
+        )
+        .outerjoin(
+            risk_alias,
+            risk_alias.notice_id == Notice.id
+        )
+        .filter(Notice.created_by == user_id)
+    )
+
+    # Filters
     if status:
-        query = query.filter(Notice.status == status)
+        base_query = base_query.filter(Notice.status == status)
 
     if section:
-        query = query.filter(Notice.section_reference.ilike(f"%{section}%"))
+        base_query = base_query.filter(
+            Notice.section_reference.ilike(f"%{section}%")
+        )
 
     if client_id:
-        query = query.filter(Notice.client_id == client_id)
+        base_query = base_query.filter(
+            Notice.client_id == client_id
+        )
 
-    if min_risk is not None:
-        query = query.join(NoticeRiskMetadata, NoticeRiskMetadata.notice_id == Notice.id)\
-                 .filter(NoticeRiskMetadata.risk_score >= min_risk)
     if from_date:
-        query = query.filter(Notice.due_date >= from_date)
+        base_query = base_query.filter(
+            Notice.due_date >= from_date
+        )
 
     if to_date:
-        query = query.filter(Notice.due_date <= to_date)
+        base_query = base_query.filter(
+            Notice.due_date <= to_date
+        )
 
-    
+    if risk_level:
+        if risk_level == "high":
+            base_query = base_query.filter(
+                risk_alias.risk_score >= 3.5
+            )
+        elif risk_level == "medium":
+            base_query = base_query.filter(
+                risk_alias.risk_score >= 2,
+                risk_alias.risk_score < 3.5
+            )
+        elif risk_level == "low":
+            base_query = base_query.filter(
+                risk_alias.risk_score < 2
+            )
 
-    total = query.count()
+    # Count (no ordering)
+    total = base_query.order_by(None).count()
 
-    notices = (
-        query
-        .order_by(Notice.id.desc())
+    # Data query
+    results = (
+        base_query
+        .order_by(
+            risk_alias.risk_score.desc().nullslast(),
+            Notice.id.desc()
+        )
         .offset((page - 1) * page_size)
         .limit(page_size)
         .all()
     )
 
+    items = []
+    for notice, risk_score in results:
+        notice.risk_score = float(risk_score) if risk_score else 0
+        items.append(notice)
+
     return {
-        "items": notices,
+        "items": items,
         "total": total,
         "page": page,
         "page_size": page_size,
     }
-
 
 def update_notice_status(db: Session, notice_id: int, status, user_id: int):
     notice = db.query(Notice).filter(
