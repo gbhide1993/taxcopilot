@@ -5,6 +5,7 @@ from app.services.llm_service import generate_answer
 from sqlalchemy.orm import Session
 from app.models.notice import Notice, NoticeStatus
 from app.services.risk_service import calculate_and_store_risk
+from app.models.notice_risk_metadata import NoticeRiskMetadata
 from datetime import date
 
 
@@ -126,6 +127,7 @@ def list_notices(
     client_id: int = None,
     from_date: date = None,
     to_date: date = None,
+    min_risk: float = None,
     page: int = 1,
     page_size: int = 10,
 ):
@@ -140,11 +142,16 @@ def list_notices(
     if client_id:
         query = query.filter(Notice.client_id == client_id)
 
+    if min_risk is not None:
+        query = query.join(NoticeRiskMetadata, NoticeRiskMetadata.notice_id == Notice.id)\
+                 .filter(NoticeRiskMetadata.risk_score >= min_risk)
     if from_date:
         query = query.filter(Notice.due_date >= from_date)
 
     if to_date:
         query = query.filter(Notice.due_date <= to_date)
+
+    
 
     total = query.count()
 

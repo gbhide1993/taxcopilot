@@ -28,7 +28,11 @@ const Notices = () => {
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [noticeDetail, setNoticeDetail] = useState(null);
+  const [draftVersions, setDraftVersions] = useState([]);
+  const [appealVersions, setAppealVersions] = useState([]);
+  const [riskData, setRiskData] = useState(null);
+  const [drawerLoading, setDrawerLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -155,12 +159,171 @@ const Notices = () => {
     }
   };
 
+const fetchNoticeDetail = async (noticeId) => {
+  try {
+    setDrawerLoading(true);
+    setRiskData(null);
+    setNoticeDetail(null);
+    setDraftVersions([]);
+    setAppealVersions([]);
+
+    const detailRes = await api.get(`/notices/${noticeId}`);
+
+    const draftRes = await api
+      .get(`/draft/${noticeId}/versions`)
+      .catch(() => ({ data: [] }));
+
+    const appealRes = await api
+      .get(`/appeals/${noticeId}/versions`)
+      .catch(() => ({ data: [] }));
+
+    const draftData = draftRes.data;
+    const appealData = appealRes.data;
+
+    setNoticeDetail(detailRes.data || {});
+
+    setDraftVersions(
+      Array.isArray(draftData)
+        ? draftData
+        : draftData?.versions || []
+    );
+
+    setAppealVersions(
+      Array.isArray(appealData)
+        ? appealData
+        : appealData?.versions || []
+    );
+
+  } catch (error) {
+    console.error(error);
+    message.error("Failed to load notice details");
+  } finally {
+    setDrawerLoading(false);
+  }
+};
+
+
+const handleRiskCalculation = async (noticeId) => {
+  try {
+    const res = await api.post(`/risk/calculate/${noticeId}`);
+
+    const score = res.data?.score ?? null;
+
+    setRiskData(res.data);
+
+    // 🔥 Update table row dynamically
+    setData((prev) =>
+      prev.map((item) =>
+        item.raw.id === noticeId
+          ? {
+              ...item,
+              risk: score,
+              raw: { ...item.raw, risk_score: score },
+            }
+          : item
+      )
+    );
+
+    message.success("Risk calculated");
+  } catch (error) {
+    console.error(error);
+    message.error("Risk calculation failed");
+  }
+};
+
+const handleGenerateDraft = async (noticeId) => {
+  try {
+    await api.post(`/draft/generate/${noticeId}`);
+    message.success("Draft generated");
+    fetchNoticeDetail(noticeId);
+  } catch {
+    message.error("Draft generation failed");
+  }
+};
+
+const handleExportDraft = async (noticeId, versionNumber) => {
+  try {
+    const response = await api.get(
+      `/draft/${noticeId}/export/${versionNumber}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `draft_notice_${noticeId}_v${versionNumber}.docx`
+    );
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    message.success("Draft downloaded");
+  } catch (error) {
+    message.error("Failed to export draft");
+  }
+};
+
+const handleGenerateAppeal = async (noticeId) => {
+  try {
+    await api.post(`/appeals/generate/${noticeId}`);
+    message.success("Appeal generated");
+    fetchNoticeDetail(noticeId);
+  } catch {
+    message.error("Appeal generation failed");
+  }
+};
+
+const handleExportAppeal = async (noticeId, versionNumber) => {
+  try {
+    const response = await api.get(
+      `/appeals/${noticeId}/export/${versionNumber}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `appeal_notice_${noticeId}_v${versionNumber}.docx`
+    );
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    message.success("Appeal downloaded");
+  } catch (error) {
+    message.error("Failed to export appeal");
+  }
+};
+
   const columns = [
     { title: "Notice Number", dataIndex: "notice" },
     { title: "Client", dataIndex: "client" },
     { title: "Section", dataIndex: "section" },
     { title: "Due Date", dataIndex: "dueDate" },
-    { title: "Risk Score", dataIndex: "risk" },
+    {
+    title: "Risk Score",
+    dataIndex: "risk",
+    sorter: (a, b) => (a.risk || 0) - (b.risk || 0),
+    sortDirections: ["descend", "ascend"],
+    defaultSortOrder: "descend",
+    render: (risk) => {
+        if (risk == null) return "—";
+
+        let color = "green";
+        if (risk >= 4) color = "red";
+        else if (risk >= 2.5) color = "orange";
+
+        return <Tag color={color}>{risk}</Tag>;
+    },
+    },
     {
       title: "Status",
       dataIndex: "status",
@@ -352,41 +515,141 @@ const Notices = () => {
             onClick: () => {
               setSelectedNotice(record);
               setOpen(true);
+              fetchNoticeDetail(record.raw.id);
             },
           })}
         />
       </Card>
 
       <Drawer
-        title="Notice Details"
-        placement="right"
-        size="large"
-        onClose={() => setOpen(false)}
-        open={open}
-      >
-        {selectedNotice && (
-          <Descriptions bordered column={1} size="small">
-            <Descriptions.Item label="Notice Number">
-              {selectedNotice.notice}
-            </Descriptions.Item>
-            <Descriptions.Item label="Client">
-              {selectedNotice.client}
-            </Descriptions.Item>
-            <Descriptions.Item label="Section">
-              {selectedNotice.section}
-            </Descriptions.Item>
-            <Descriptions.Item label="Due Date">
-              {selectedNotice.dueDate}
-            </Descriptions.Item>
-            <Descriptions.Item label="Risk Score">
-              {selectedNotice.risk}
-            </Descriptions.Item>
-            <Descriptions.Item label="Assigned To">
-              {selectedNotice.assigned}
-            </Descriptions.Item>
-          </Descriptions>
+  title="Notice Details"
+  placement="right"
+  size="large"
+  onClose={() => setOpen(false)}
+  open={open}
+>
+  {drawerLoading ? (
+    <div style={{ padding: 24 }}>Loading...</div>
+  ) : !noticeDetail ? (
+    <div style={{ padding: 24 }}>No data available</div>
+  ) : (
+    <>
+      <Descriptions bordered column={1} size="small">
+        <Descriptions.Item label="Notice Number">
+          {noticeDetail.notice_number || "—"}
+        </Descriptions.Item>
+        <Descriptions.Item label="Section">
+          {noticeDetail.section_reference || "—"}
+        </Descriptions.Item>
+        <Descriptions.Item label="Assessment Year">
+          {noticeDetail.assessment_year || "—"}
+        </Descriptions.Item>
+        <Descriptions.Item label="Status">
+          {noticeDetail.status || "—"}
+        </Descriptions.Item>
+      </Descriptions>
+
+      <div style={{ marginTop: 24 }}>
+        <h4>Risk</h4>
+        <Button
+          type="primary"
+          onClick={() => handleRiskCalculation(noticeDetail.id)}
+        >
+          Calculate Risk
+        </Button>
+
+        {riskData && (
+          <div style={{ marginTop: 12 }}>
+            <p>Risk Score: {riskData?.score ?? "—"}</p>
+          </div>
         )}
-      </Drawer>
+      </div>
+
+        <div style={{ marginTop: 24 }}>
+  <h4>Drafts</h4>
+
+  <Button
+    type="primary"
+    style={{ marginBottom: 12 }}
+    onClick={() => handleGenerateDraft(noticeDetail.id)}
+  >
+    Generate Draft
+  </Button>
+
+  <Table
+    size="small"
+    rowKey="version_number"
+    dataSource={draftVersions}
+    pagination={false}
+    columns={[
+      {
+        title: "Version",
+        dataIndex: "version_number",
+        render: (v) => `V${v}`,
+      },
+      {
+        title: "Actions",
+        render: (_, record) => (
+          <Button
+            type="link"
+            onClick={() =>
+              handleExportDraft(noticeDetail.id, record.version_number)
+            }
+          >
+            Export DOCX
+          </Button>
+        ),
+      },
+    ]}
+  />
+</div>
+     
+
+      <div style={{ marginTop: 24 }}>
+  <h4>Appeals</h4>
+
+  <Button
+    type="primary"
+    style={{ marginBottom: 12 }}
+    onClick={() => handleGenerateAppeal(noticeDetail.id)}
+  >
+    Generate Appeal
+  </Button>
+
+  <Table
+    size="small"
+    rowKey="version_number"
+    dataSource={appealVersions}
+    pagination={false}
+    columns={[
+      {
+        title: "Version",
+        dataIndex: "version_number",
+        render: (v) => `V${v}`,
+      },
+      {
+        title: "Actions",
+        render: (_, record) => (
+          <Button
+            type="link"
+            onClick={() =>
+              handleExportAppeal(noticeDetail.id, record.version_number)
+            }
+          >
+            Export DOCX
+          </Button>
+        ),
+      },
+    ]}
+  />
+</div>
+
+
+    </>
+  )}
+</Drawer>
+
+
     </div>
   );
 };

@@ -69,7 +69,10 @@ def calculate_and_store_risk(db: Session, notice_id: int):
     )
 
     if not section:
-        return  # silently skip if section not grounded yet
+        return {
+            "score": None,
+            "message": "Section not grounded yet"
+        }
 
     severity_score = section.severity_level
 
@@ -102,11 +105,12 @@ def calculate_and_store_risk(db: Session, notice_id: int):
 
     repeat_weight = 5 if repeat_count > 0 else 1
 
-    risk_score = (
+    risk_score = round(
         (severity_score * 0.4) +
         (urgency_weight * 0.3) +
         (status_weight * 0.2) +
-        (repeat_weight * 0.1)
+        (repeat_weight * 0.1),
+        2
     )
 
     existing = db.query(NoticeRiskMetadata).filter(
@@ -131,6 +135,14 @@ def calculate_and_store_risk(db: Session, notice_id: int):
             )
         )
 
+    db.commit()
+
+    return {
+        "score": risk_score,
+        "severity": severity_score,
+        "days_remaining": days_remaining,
+        "repeat_flag": repeat_count > 0
+    }
 
 def get_risk_summary(db: Session):
 

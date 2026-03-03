@@ -10,7 +10,8 @@ import sys
 sys.path.append(os.getcwd())
 
 from app.database import Base
-from app.models import user, client, notice, document, document_chunk, role, sections_master, notice_timeline, notice_risk_metadata, draft_version, appeal_versions
+from app.models import (user, client, notice, document, document_chunk, role, sections_master, notice_timeline, 
+notice_risk_metadata, draft_version, appeal_versions, notice_assignment)
 
 
 # this is the Alembic Config object, which provides

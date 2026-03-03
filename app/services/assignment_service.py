@@ -37,9 +37,11 @@ def assign_notice(db: Session, notice_id: int, assigned_to: int, role: str):
 
     db.commit()
 
+    user_role = db.query(User).filter(User.id == assigned_to).first().role.name
+
     return {
         "notice_id": notice_id,
         "assigned_to": assigned_to,
-        "role": role,
+        "role": user_role,
         "message": "Notice assigned successfully."
     }

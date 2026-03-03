@@ -40,3 +40,8 @@ class NoticeResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AssignmentResponse(BaseModel):
+    message: str
+    notice_id: int
+    assigned_to: int
