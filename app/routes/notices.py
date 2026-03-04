@@ -25,6 +25,7 @@ from app.models.notice_timeline import NoticeTimeline
 from app.models.user import User
 from app.models.sections_master import SectionsMaster
 from app.models.notice_risk_metadata import NoticeRiskMetadata
+from app.models.firm_settings import FirmSettings
 
 from app.schemas.notice_schema import (
     NoticeCreate,
@@ -42,6 +43,8 @@ from app.services.notice_service import (
     update_notice_status as update_notice_status_service,
     classify_notice,
 )
+from app.services.draft_service import generate_structured_draft
+from app.services.section_service import get_section_by_act_and_number
 from app.services.assignment_service import assign_notice
 from app.services.notice_parser_service import (
     extract_section,
@@ -148,6 +151,18 @@ def upload_notice(
         db.add(notice)
         db.commit()
         db.refresh(notice)
+
+        settings = db.query(FirmSettings).first()
+
+        if settings and settings.auto_generate_draft:
+            section = get_section_by_act_and_number(
+                db,
+                notice.act_name,
+                notice.section_reference
+            )
+
+            if section:
+                generate_structured_draft(db, notice.id)
 
         return {
             "message": "Notice uploaded and classified successfully",
