@@ -13,10 +13,16 @@ import {
   Descriptions,
   Dropdown,
   message,
+  Modal,
+  Upload,
 } from "antd";
 import { useState, useEffect } from "react";
 import api from "../api/axios";
 import dayjs from "dayjs";
+import utc  from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import { getStatusTag } from "../utils/statusUtils";
 
 const { RangePicker } = DatePicker;
@@ -36,6 +42,11 @@ const Notices = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [timeline, setTimeline] = useState([]);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadClient, setUploadClient] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const [filters, setFilters] = useState({
     status: null,
@@ -49,6 +60,38 @@ const Notices = () => {
   useEffect(() => {
     fetchData(page, pageSize, filters);
   }, [page, pageSize]);
+
+const handleUpload = async () => {
+  if (!uploadClient || !uploadFile) {
+    message.error("Please select client and file");
+    return;
+  }
+
+  try {
+    setUploadLoading(true);
+
+    const formData = new FormData();
+    formData.append("client_id", uploadClient);
+    formData.append("file", uploadFile);
+
+    await api.post("/notices/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    message.success("Notice uploaded successfully");
+
+    setUploadOpen(false);
+    setUploadFile(null);
+    setUploadClient(null);
+
+    fetchData(page, pageSize, filters); // refresh table
+  } catch (error) {
+    console.error(error);
+    message.error("Upload failed");
+  } finally {
+    setUploadLoading(false);
+  }
+};
 
   const fetchData = async (pageParam, pageSizeParam, activeFilters) => {
     try {
@@ -93,7 +136,7 @@ const Notices = () => {
         client: clientMapping[item.client_id] || "—",
         section: item.section_reference || "—",
         dueDate: item.due_date
-          ? dayjs(item.due_date).format("DD MMM YYYY")
+          ? dayjs.utc(item.due_date).local().format("DD MMM YYYY HH:mm")
           : "—",
         risk_score: item.risk_score ?? 0,
         status: item.status,
@@ -181,7 +224,8 @@ const fetchNoticeDetail = async (noticeId) => {
 
     const draftData = draftRes.data;
     const appealData = appealRes.data;
-
+    const timelineRes = await api.get(`/notices/${noticeId}/timeline`);
+    setTimeline(timelineRes.data);
     setNoticeDetail(detailRes.data || {});
 
     setDraftVersions(
@@ -309,7 +353,42 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
     { title: "Notice Number", dataIndex: "notice" },
     { title: "Client", dataIndex: "client" },
     { title: "Section", dataIndex: "section" },
-    { title: "Due Date", dataIndex: "dueDate" },
+    {
+    title: "Due Date",
+    dataIndex: "dueDate",
+    render: (_, record) => {
+        const today = new Date();
+        const due = new Date(record.raw?.due_date);
+        const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+        if (diff < 0)
+        return (
+            <>
+            {record.dueDate} <Tag color="red">Overdue</Tag>
+            </>
+        );
+
+        if (diff <= 3)
+        return (
+            <>
+            {record.dueDate} <Tag color="volcano">Due Soon</Tag>
+            </>
+        );
+
+        if (diff <= 7)
+        return (
+            <>
+            {record.dueDate} <Tag color="orange">{diff} days left</Tag>
+            </>
+        );
+
+        return (
+        <>
+            {record.dueDate} <Tag color="green">{diff} days left</Tag>
+        </>
+        );
+    },
+    },
     {
     title: "Risk Score",
     dataIndex: "risk_score",
@@ -381,6 +460,13 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
 
   return (
     <div>
+        <Row style={{ marginBottom: 16 }}>
+            <Col>
+                <Button type="primary" onClick={() => setUploadOpen(true)}>
+                Upload Notice
+                </Button>
+            </Col>
+        </Row>
       <Card size="small" style={{ marginBottom: 16 }}>
         <Form layout="vertical">
           <Row gutter={16}>
@@ -466,9 +552,9 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
                     setFilters((prev) => ({ ...prev, risk_level: value }))
                 }
                 >
-                <Select.Option value="high">High (4+)</Select.Option>
-                <Select.Option value="medium">Medium (2.5+)</Select.Option>
-                <Select.Option value="low">Low (1+)</Select.Option>
+                <Select.Option value="high">High </Select.Option>
+                <Select.Option value="medium">Medium </Select.Option>
+                <Select.Option value="low">Low </Select.Option>
                 </Select>
             </Form.Item>
             </Col>
@@ -568,7 +654,19 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
           {noticeDetail.status || "—"}
         </Descriptions.Item>
       </Descriptions>
+    <div style={{ marginTop: 12 }}>
+    <strong>SLA Status:</strong>{" "}
+    {(() => {
+        const today = new Date();
+        const due = new Date(noticeDetail.due_date);
+        const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
 
+        if (diff < 0) return <Tag color="red">Overdue</Tag>;
+        if (diff <= 3) return <Tag color="volcano">Due Soon</Tag>;
+        if (diff <= 7) return <Tag color="orange">{diff} days left</Tag>;
+        return <Tag color="green">{diff} days left</Tag>;
+    })()}
+    </div>
       <div style={{ marginTop: 24 }}>
         <h4>Risk</h4>
         <Button
@@ -664,12 +762,58 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
   />
 </div>
 
+<div style={{ marginTop: 24 }}>
+  <h4>Activity Timeline</h4>
+
+  <ul>
+    {timeline.map((entry, index) => (
+      <li key={index}>
+        <strong>{entry.event_type}</strong> — {entry.description} <br />
+        <small>{dayjs.utc(entry.created_at).local().format("DD MMM YYYY HH:mm")}</small>
+      </li>
+    ))}
+  </ul>
+</div>
 
     </>
   )}
 </Drawer>
 
+<Modal
+  title="Upload Notice PDF"
+  open={uploadOpen}
+  onCancel={() => setUploadOpen(false)}
+  onOk={handleUpload}
+  confirmLoading={uploadLoading}
+>
+  <Form layout="vertical">
+    <Form.Item label="Client" required>
+      <Select
+        placeholder="Select client"
+        onChange={(value) => setUploadClient(value)}
+      >
+        {clients.map((client) => (
+          <Select.Option key={client.id} value={client.id}>
+            {client.name}
+          </Select.Option>
+        ))}
+      </Select>
+    </Form.Item>
 
+    <Form.Item label="PDF File" required>
+      <Upload
+        beforeUpload={(file) => {
+          setUploadFile(file);
+          return false;
+        }}
+        maxCount={1}
+        accept=".pdf"
+      >
+        <Button>Select PDF</Button>
+      </Upload>
+    </Form.Item>
+  </Form>
+</Modal>
     </div>
   );
 };

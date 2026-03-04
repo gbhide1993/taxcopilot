@@ -7,8 +7,12 @@ from sqlalchemy import func, desc
 
 
 
+
 def generate_structured_draft(db: Session, notice_id: int):
 
+    # ---------------------------------
+    # 1️⃣ Validate Notice Exists
+    # ---------------------------------
     notice = db.query(Notice).filter(Notice.id == notice_id).first()
 
     if not notice:
@@ -17,24 +21,43 @@ def generate_structured_draft(db: Session, notice_id: int):
             detail="Notice not found."
         )
 
-    if notice.section_reference == "UNKNOWN":
+    # ---------------------------------
+    # 2️⃣ Strict Grounding Validation
+    # ---------------------------------
+
+    if not notice.act_name or not notice.act_name.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Notice section is not properly defined."
+            detail="Act name not defined for this notice. Cannot generate draft."
         )
 
-    # Strict grounding lookup
+    if not notice.section_reference or not notice.section_reference.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Section reference not defined for this notice."
+        )
+
+    # Strict lookup in SectionsMaster
     section = get_section_by_act_and_number(
         db,
-        notice.act_name,
-        notice.section_reference
+        notice.act_name.strip(),
+        notice.section_reference.strip()
     )
 
-    # Deterministic Draft Construction
+    if not section:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Section not grounded in master database."
+        )
+
+    # ---------------------------------
+    # 3️⃣ Deterministic Draft Construction
+    # ---------------------------------
+
     introduction = (
         f"This is in response to Notice No. {notice.notice_number} "
-        f"issued under {notice.section_reference} of the "
-        f"{notice.act_name}."
+        f"issued under Section {section.section_reference} "
+        f"of the {notice.act_name}."
     )
 
     facts_summary = (
@@ -44,12 +67,12 @@ def generate_structured_draft(db: Session, notice_id: int):
     )
 
     legal_position = (
-        f"As per {section.section_reference} titled "
-        f"'{section.heading}', the law states:\n\n"
+        f"As per Section {section.section_reference} titled "
+        f"'{section.heading}', the law provides as follows:\n\n"
         f"{section.heading}"
     )
 
-    section_reference = (
+    section_reference_display = (
         f"{section.section_reference} – {section.heading}"
     )
 
@@ -59,7 +82,10 @@ def generate_structured_draft(db: Session, notice_id: int):
         "initiated under the said notice be dropped."
     )
 
-     # Determine next version number
+    # ---------------------------------
+    # 4️⃣ Versioning Logic
+    # ---------------------------------
+
     latest_version = (
         db.query(func.max(DraftVersion.version_number))
         .filter(DraftVersion.notice_id == notice.id)
@@ -74,7 +100,7 @@ def generate_structured_draft(db: Session, notice_id: int):
         introduction=introduction,
         facts_summary=facts_summary,
         legal_position=legal_position,
-        section_reference=section_reference,
+        section_reference=section_reference_display,
         prayer=prayer
     )
 
@@ -82,15 +108,20 @@ def generate_structured_draft(db: Session, notice_id: int):
     db.commit()
     db.refresh(draft_version)
 
+    # ---------------------------------
+    # 5️⃣ Return Structured Response
+    # ---------------------------------
+
     return {
         "notice_id": notice.id,
         "version_number": next_version,
         "introduction": introduction,
         "facts_summary": facts_summary,
         "legal_position": legal_position,
-        "section_reference": section_reference,
+        "section_reference": section_reference_display,
         "prayer": prayer
     }
+
 
 def get_latest_draft(db: Session, notice_id: int):
 

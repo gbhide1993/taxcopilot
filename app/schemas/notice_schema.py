@@ -28,7 +28,7 @@ class NoticeResponse(BaseModel):
     id: int
     notice_number: str
     notice_type: str
-    act_name: str
+    act_name: Optional[str] = None
     section_reference: str | None
     assessment_year: str | None
     description: str | None

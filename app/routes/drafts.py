@@ -31,12 +31,13 @@ def get_latest(
 ):
     return get_latest_draft(db, notice_id)
 
-@router.get("/{notice_id}/versions", response_model=DraftVersionListResponse)
+@router.get("/{notice_id}/versions")
 def get_versions(
     notice_id: int,
     db: Session = Depends(get_db)
 ):
-    return get_all_draft_versions(db, notice_id)
+    versions = get_all_draft_versions(db, notice_id)
+    return versions or []
 
 @router.get("/{notice_id}/export/{version_number}")
 def export_draft(

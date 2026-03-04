@@ -9,5 +9,4 @@ class AssignNoticeRequest(BaseModel):
 class AssignNoticeResponse(BaseModel):
     notice_id: int
     assigned_to: int
-    role: str
     message: str

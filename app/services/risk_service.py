@@ -7,6 +7,8 @@ from app.models.notice import Notice
 from app.models.sections_master import SectionsMaster
 from app.models.draft_version import DraftVersion
 from app.models.notice_risk_metadata import NoticeRiskMetadata  # create model
+from app.services.section_service import get_section_by_act_and_number
+
 
 def calculate_urgency_weight(days_remaining: int) -> int:
 
@@ -59,13 +61,11 @@ def calculate_and_store_risk(db: Session, notice_id: int):
             detail="Notice not found."
         )
 
-    section = (
-        db.query(SectionsMaster)
-        .filter(
-            SectionsMaster.act_name == notice.act_name,
-            SectionsMaster.section_reference == notice.section_reference
-        )
-        .first()
+
+    section = get_section_by_act_and_number(
+        db,
+        notice.act_name,
+        notice.section_reference
     )
 
     if not section:

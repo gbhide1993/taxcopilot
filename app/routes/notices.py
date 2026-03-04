@@ -1,4 +1,5 @@
 import os
+import re
 import fitz
 from datetime import date, timedelta
 
@@ -22,6 +23,8 @@ from app.dependencies.license_guard import check_license
 from app.models.notice import NoticeStatus, Notice
 from app.models.notice_timeline import NoticeTimeline
 from app.models.user import User
+from app.models.sections_master import SectionsMaster
+from app.models.notice_risk_metadata import NoticeRiskMetadata
 
 from app.schemas.notice_schema import (
     NoticeCreate,
@@ -94,7 +97,29 @@ def upload_notice(
                 detail="Unable to extract text from PDF.",
             )
 
-        section_reference = extract_section(extracted_text)
+        sections = db.query(SectionsMaster.section_reference).all()
+        valid_sections = {s[0] for s in sections}
+
+        # -----------------------------------------
+        # Load valid sections from master
+        # -----------------------------------------
+
+        sections = db.query(SectionsMaster.section_reference).all()
+
+        valid_sections = {
+            re.sub(r"^Section\s+", "", s[0]).strip()
+            for s in sections
+        }
+
+        # -----------------------------------------
+        # Extract section using validated extraction
+        # -----------------------------------------
+
+        section_reference = extract_section(
+            extracted_text,
+            valid_sections
+        )
+
         assessment_year = extract_assessment_year(extracted_text)
         received_date, due_date = extract_dates(extracted_text)
 
@@ -107,6 +132,7 @@ def upload_notice(
         notice = Notice(
             notice_number=file.filename,
             notice_type="Income Tax Notice",
+            act_name="Income Tax Act 2025",
             section_reference=section_reference,
             assessment_year=assessment_year,
             description="Auto-classified notice",
@@ -192,6 +218,7 @@ def change_status(
 # ---------------------------------------------------------
 # 📘 Assign Notice (Uses Assignment Service)
 # ---------------------------------------------------------
+
 @router.put("/{notice_id}/assign", response_model=AssignNoticeResponse)
 def assign(
     notice_id: int,
@@ -209,7 +236,26 @@ def assign(
     if not updated:
         raise HTTPException(status_code=404, detail="Notice not found")
 
-    return updated
+    # Fetch assigned user name
+    assigned_user = db.query(User).filter(User.id == data.assigned_to).first()
+
+    assigned_name = assigned_user.full_name if assigned_user else f"User {data.assigned_to}"
+    current_name = current_user.full_name 
+    # Create timeline entry
+    timeline_entry = NoticeTimeline(
+        notice_id=notice_id,
+        event_type="ASSIGNMENT",
+        description=f"Notice assigned to {assigned_name} by {current_name}",
+    )
+
+    db.add(timeline_entry)
+    db.commit()
+
+    return AssignNoticeResponse(
+    message="Notice assigned successfully",
+    notice_id=notice_id,
+    assigned_to=data.assigned_to
+    )
 
 
 # ---------------------------------------------------------
@@ -251,14 +297,53 @@ def update_notice_status(
 # ---------------------------------------------------------
 # 📘 Get Single Notice
 # ---------------------------------------------------------
+
 @router.get("/{notice_id}", response_model=NoticeResponse)
 def get_notice_detail(
     notice_id: int,
     db: Session = Depends(get_db),
 ):
-    notice = db.query(Notice).filter(Notice.id == notice_id).first()
+    result = (
+        db.query(Notice, NoticeRiskMetadata.risk_score)
+        .outerjoin(
+            NoticeRiskMetadata,
+            NoticeRiskMetadata.notice_id == Notice.id
+        )
+        .filter(Notice.id == notice_id)
+        .first()
+    )
 
-    if not notice:
+    if not result:
         raise HTTPException(status_code=404, detail="Notice not found")
 
+    notice, risk_score = result
+
+    # Attach risk score to notice object
+    notice.risk_score = float(risk_score) if risk_score else 0
+
     return notice
+
+    
+
+
+@router.get("/{notice_id}/timeline")
+def get_notice_timeline(
+    notice_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    entries = (
+        db.query(NoticeTimeline)
+        .filter(NoticeTimeline.notice_id == notice_id)
+        .order_by(NoticeTimeline.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "event_type": e.event_type,
+            "description": e.description,
+            "created_at": e.created_at
+        }
+        for e in entries
+    ]

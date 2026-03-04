@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
-  const [topNotices, setTopNotices] = useState([]);
+  const [workQueue, setWorkQueue] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -15,18 +15,21 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/risk/monitor");
 
-      setStats(res.data);
+      const [monitorRes, queueRes] = await Promise.all([
+        api.get("/risk/monitor"),
+        api.get("/risk/work-queue"),
+      ]);
 
-      setTopNotices(
-        (res.data.top_notices || []).map((item) => ({
+      setStats(monitorRes.data);
+
+      setWorkQueue(
+        queueRes.data.map((item) => ({
           key: item.notice_id,
           notice: item.notice_number,
-          dueDate: item.due_date
-            ? dayjs(item.due_date).format("DD MMM YYYY")
-            : "—",
+          dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
           risk: item.risk_score,
+          priority: item.priority,
         }))
       );
     } catch (error) {
@@ -48,22 +51,34 @@ const Dashboard = () => {
         return <Tag color="green">{risk.toFixed(2)}</Tag>;
       },
     },
+    {
+      title: "Priority",
+      dataIndex: "priority",
+      render: (priority) => {
+        if (priority === 1) return <Tag color="red">Critical</Tag>;
+        if (priority === 2) return <Tag color="volcano">High</Tag>;
+        if (priority === 3) return <Tag color="orange">Due Soon</Tag>;
+        return <Tag color="blue">Medium</Tag>;
+      },
+    },
   ];
 
-  const statCards = [
-    { title: "Total Notices", value: stats?.total || 0 },
-    { title: "High Risk", value: stats?.high || 0, color: "red" },
-    { title: "Medium Risk", value: stats?.medium || 0, color: "orange" },
-    { title: "Low Risk", value: stats?.low || 0, color: "green" },
-    { title: "Overdue + High", value: stats?.overdue_high || 0, color: "crimson" },
-  ];
+  const statCards = stats
+    ? [
+        { title: "Total Notices", value: stats.total },
+        { title: "High Risk", value: stats.high, color: "red" },
+        { title: "Medium Risk", value: stats.medium, color: "orange" },
+        { title: "Low Risk", value: stats.low, color: "green" },
+        { title: "Overdue + High", value: stats.overdue_high, color: "crimson" },
+      ]
+    : [];
 
   return (
     <div>
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         {statCards.map((item, index) => (
           <Col span={4} key={index}>
-            <Card size="small" hoverable>
+            <Card size="small">
               <div
                 style={{
                   fontSize: 20,
@@ -81,10 +96,10 @@ const Dashboard = () => {
         ))}
       </Row>
 
-      <Card size="small" title="Top Risky Notices">
+      <Card size="small" title="Priority Work Queue">
         <Table
           columns={columns}
-          dataSource={topNotices}
+          dataSource={workQueue}
           pagination={false}
           size="small"
           loading={loading}

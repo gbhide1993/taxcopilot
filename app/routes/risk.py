@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.risk_service import calculate_and_store_risk
 from app.dependencies.auth import get_current_user
+from sqlalchemy import desc
+from datetime import date, timedelta
 
 router = APIRouter(
     prefix="/risk",
@@ -104,3 +106,44 @@ def risk_monitor(
             for n, r in top_notices
         ]
     }
+
+@router.get("/work-queue")
+def work_queue(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    today = date.today()
+    soon = today + timedelta(days=3)
+
+    results = (
+        db.query(Notice, NoticeRiskMetadata)
+        .join(NoticeRiskMetadata)
+        .filter(Notice.created_by == current_user.id)
+        .all()
+    )
+
+    queue = []
+
+    for notice, risk in results:
+        priority = 4  # default lowest
+
+        if notice.due_date < today and risk.risk_score >= 4:
+            priority = 1
+        elif risk.risk_score >= 4:
+            priority = 2
+        elif notice.due_date <= soon:
+            priority = 3
+        elif risk.risk_score >= 2.5:
+            priority = 4
+
+        queue.append({
+            "notice_id": notice.id,
+            "notice_number": notice.notice_number,
+            "due_date": notice.due_date,
+            "risk_score": risk.risk_score,
+            "priority": priority
+        })
+
+    queue = sorted(queue, key=lambda x: x["priority"])
+
+    return queue[:20]
