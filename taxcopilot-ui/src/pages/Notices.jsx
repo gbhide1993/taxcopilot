@@ -43,6 +43,11 @@ const Notices = () => {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [timeline, setTimeline] = useState([]);
+  // Detect if first draft was auto-generated
+  const firstVersionAuto =
+    draftVersions.length > 0 &&
+    draftVersions[0]?.version_number === 1 &&
+    timeline.some((e) => e.event_type === "AUTO_DRAFT");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadClient, setUploadClient] = useState(null);
@@ -684,8 +689,10 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
       </div>
 
         <div style={{ marginTop: 24 }}>
-  <h4>Drafts</h4>
 
+
+  <h4>Drafts</h4>
+ 
   <Button
     type="primary"
     style={{ marginBottom: 12 }}
@@ -693,18 +700,36 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
   >
     Generate Draft
   </Button>
-
+   
   <Table
     size="small"
     rowKey="version_number"
+    
     dataSource={draftVersions}
     pagination={false}
     columns={[
+        
       {
         title: "Version",
         dataIndex: "version_number",
-        render: (v) => `V${v}`,
-      },
+        render: (v) => {
+            const isAuto =
+            v === 1 &&
+            timeline.some((e) => e.event_type === "AUTO_DRAFT");
+
+            return (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span>V{v}</span>
+                {isAuto && (
+                <Tag color="green" bordered={false}>
+                    ⚡ Auto Genererated
+                </Tag>
+                )}
+            </div>
+            );
+        },
+    },
+
       {
         title: "Actions",
         render: (_, record) => (

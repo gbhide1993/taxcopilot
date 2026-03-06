@@ -26,6 +26,10 @@ from app.models.user import User
 from app.models.sections_master import SectionsMaster
 from app.models.notice_risk_metadata import NoticeRiskMetadata
 from app.models.firm_settings import FirmSettings
+from app.models.user import User
+from app.models.role import Role
+from app.services.risk_service import calculate_and_store_risk
+
 
 from app.schemas.notice_schema import (
     NoticeCreate,
@@ -154,6 +158,7 @@ def upload_notice(
 
         settings = db.query(FirmSettings).first()
 
+        # 1️⃣ Auto Draft Generation (if enabled)
         if settings and settings.auto_generate_draft:
             section = get_section_by_act_and_number(
                 db,
@@ -163,6 +168,51 @@ def upload_notice(
 
             if section:
                 generate_structured_draft(db, notice.id)
+
+                timeline_entry = NoticeTimeline(
+                    notice_id=notice.id,
+                    event_type="AUTO_DRAFT",
+                    description="Draft auto-generated based on firm automation setting"
+                )
+
+                db.add(timeline_entry)
+                db.commit()
+
+        # 2️⃣ Auto Risk
+        if settings and settings.auto_generate_risk:
+            risk_result = calculate_and_store_risk(db, notice.id)
+            score = risk_result.get("score")
+
+            db.add(NoticeTimeline(
+                notice_id=notice.id,
+                event_type="AUTO_RISK",
+                description=f"Risk auto-calculated with score {score}"
+            ))
+            db.commit()
+
+        # 3️⃣ Auto Assign High Risk
+        if (
+            settings.auto_assign_high_risk
+            and score is not None
+            and score >= settings.high_risk_threshold
+        ):
+            senior_user = (
+                db.query(User)
+                .join(Role)
+                .filter(Role.name == "SENIOR_CA")
+                .first()
+            )
+
+            if senior_user:
+                notice.assigned_to = senior_user.id
+                db.commit()
+
+                db.add(NoticeTimeline(
+                    notice_id=notice.id,
+                    event_type="AUTO_ASSIGN",
+                    description=f"Notice auto-assigned to {senior_user.full_name} due to high risk"
+                ))
+                db.commit()
 
         return {
             "message": "Notice uploaded and classified successfully",
@@ -188,6 +238,8 @@ def get_notices(
     from_date: date = Query(None),
     to_date: date = Query(None),
     risk_level: str = Query(None),
+    unassigned_only: bool = False,
+    overdue_only: bool = False,
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -200,6 +252,8 @@ def get_notices(
         section=section,
         client_id=client_id,
         risk_level=risk_level,
+        unassigned_only=unassigned_only,
+        overdue_only=overdue_only,
         from_date=from_date,
         to_date=to_date,
         page=page,

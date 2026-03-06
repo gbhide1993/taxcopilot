@@ -205,3 +205,79 @@ def get_section_distribution(db: Session):
         }
         for r in results
     ]
+
+def get_risk_drivers(notice):
+
+    reasons = []
+
+    section = notice.section_reference or ""
+
+    if "143(2)" in section:
+        reasons.append("Scrutiny notice under Section 143(2)")
+
+    elif "148" in section:
+        reasons.append("Reassessment proceedings initiated")
+
+    elif "271" in section:
+        reasons.append("Penalty exposure under section")
+
+    elif section:
+        reasons.append(f"Notice issued under Section {section}")
+
+    if notice.due_date:
+
+        from datetime import datetime
+
+        today = datetime.utcnow().date()
+        diff = (notice.due_date - today).days
+
+        if notice.risk_score >= 3.5:
+            reasons.append("High litigation risk score")
+            
+        if diff <= 3 and diff >= 0:
+            reasons.append(f"Response deadline in {diff} days")
+
+        if diff < 0:
+            reasons.append("Notice response already overdue")
+
+    if not notice.assigned_to:
+        reasons.append("Notice currently unassigned")
+
+    return reasons
+
+def get_recommended_action(notice):
+
+    from datetime import datetime
+
+    if not notice.due_date:
+        return "Review notice"
+
+    today = datetime.utcnow().date()
+    diff = (notice.due_date - today).days
+
+    if notice.risk_score >= 4 and not notice.assigned_to:
+        return "Assign Senior CA immediately"
+
+    if notice.risk_score >= 3 and diff <= 3:
+        return "Prepare response draft urgently"
+
+    if notice.risk_score >= 3:
+        return "Assign CA and review notice"
+
+    if diff <= 7:
+        return "Monitor timeline"
+
+    return "Low priority"
+
+def get_risk_severity(score):
+
+    if score >= 4:
+        return "CRITICAL"
+
+    if score >= 3:
+        return "HIGH"
+
+    if score >= 2:
+        return "MEDIUM"
+
+    return "LOW"

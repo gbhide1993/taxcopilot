@@ -8,6 +8,15 @@ from app.services.risk_service import calculate_and_store_risk
 from app.models.notice_risk_metadata import NoticeRiskMetadata
 from datetime import date
 from sqlalchemy.orm import aliased
+from app.models.sections_master import SectionsMaster
+from app.models.user import User
+from datetime import date
+from app.services.risk_service import (
+    get_risk_drivers,
+    get_recommended_action,
+    get_risk_severity
+)
+
 
 
 def create_notice(
@@ -15,20 +24,24 @@ def create_notice(
     notice_data,
     created_by: int,
 ):
+    clean_section = notice_data.section_reference.replace("Section", "").strip()
+    normalized_section = f"Section {clean_section}"
     # 🔐 Validate section exists in master table
-    from app.models.sections_master import SectionsMaster
 
     section_exists = (
-        db.query(SectionsMaster)
-        .filter(
-            SectionsMaster.act_name == notice_data.act_name,
-            SectionsMaster.section_reference == notice_data.section_reference
-        )
-        .first()
+    db.query(SectionsMaster)
+    .filter(
+        SectionsMaster.act_name == notice_data.act_name,
+        SectionsMaster.section_reference == normalized_section
+    )
+    .first()
     )
 
     if not section_exists:
         raise ValueError("Invalid section reference for selected Act.")
+
+    # Save normalized value
+    notice_data.section_reference = notice_data.section_reference.strip()
 
     notice = Notice(
         notice_number=notice_data.notice_number,
@@ -54,10 +67,16 @@ def create_notice(
 
     return notice
     
-
 def extract_section(text: str):
-    match = re.search(r"section\s+(\d+[A-Za-z]*)", text, re.IGNORECASE)
-    return match.group(1) if match else None
+    pattern = r"(?:section|sec\.?|u/s|under section)\s*([0-9]+[A-Za-z]?(?:\([0-9A-Za-z]+\))*)"
+    
+    match = re.search(pattern, text, re.IGNORECASE)
+    
+    if match:
+        return match.group(1).strip()
+    
+    return None
+
 
 
 def extract_assessment_year(text: str):
@@ -128,19 +147,27 @@ def list_notices(
     from_date: date = None,
     to_date: date = None,
     risk_level: str = None,
+    unassigned_only: bool = False,
+    overdue_only: bool = False,
     page: int = 1,
     page_size: int = 10,
 ):
     risk_alias = aliased(NoticeRiskMetadata)
+    user_alias = aliased(User)
 
     base_query = (
         db.query(
             Notice,
-            risk_alias.risk_score
+            risk_alias.risk_score,
+            user_alias.full_name.label("assigned_user_name")
         )
         .outerjoin(
             risk_alias,
             risk_alias.notice_id == Notice.id
+        )
+        .outerjoin(
+            user_alias,
+            user_alias.id == Notice.assigned_to
         )
         .filter(Notice.created_by == user_id)
     )
@@ -183,6 +210,13 @@ def list_notices(
             base_query = base_query.filter(
                 risk_alias.risk_score < 2
             )
+    # Unassigned filter
+    if unassigned_only:
+        base_query = base_query.filter(Notice.assigned_to == None)
+
+    # Overdue filter
+    if overdue_only:
+        base_query = base_query.filter(Notice.due_date < date.today())
 
     # Count (no ordering)
     total = base_query.order_by(None).count()
@@ -200,9 +234,20 @@ def list_notices(
     )
 
     items = []
-    for notice, risk_score in results:
-        notice.risk_score = float(risk_score) if risk_score else 0
+    for notice, risk_score, assigned_user_name in results:
+
+        score = float(risk_score) if risk_score else 0
+
+        notice.risk_score = score
+        notice.assigned_user_name = assigned_user_name
+
+        notice.risk_drivers = get_risk_drivers(notice)
+        notice.recommended_action = get_recommended_action(notice)
+        notice.risk_severity = get_risk_severity(score)
+
         items.append(notice)
+
+    
 
     return {
         "items": items,

@@ -103,3 +103,8 @@ button:focus-visible {
   background-color: #f6de9d !important;
   color: black !important;
 }
+
+.ant-table-wrapper .ant-table-tbody > tr.row-escalated > td {
+  background-color: #f69db5 !important;
+
+}
