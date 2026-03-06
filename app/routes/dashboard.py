@@ -5,12 +5,25 @@ from sqlalchemy import desc, func
 from datetime import date
 
 from app.database import get_db
+from app.services.dashboard_service import get_dashboard_summary
 from app.models.notice import Notice
 from app.models.notice_risk_metadata import NoticeRiskMetadata
 from app.models.firm import Firm
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 templates = Jinja2Templates(directory="app/templates")
+
+
+router = APIRouter(
+    prefix="/dashboard",
+    tags=["Dashboard"]
+)
+
+@router.get("/")
+def dashboard_summary(
+    db: Session = Depends(get_db)
+):
+    return get_dashboard_summary(db)
 
 
 @router.get("")

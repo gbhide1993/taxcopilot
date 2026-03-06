@@ -7,6 +7,8 @@ from app.models.notice import Notice
 from app.models.draft_version import DraftVersion
 from app.models.notice_risk_metadata import NoticeRiskMetadata
 from app.models.appeal_versions import AppealVersion
+from app.models.client import Client
+from app.models.notice import Notice
 
 
 def generate_appeal(db: Session, notice_id: int):
@@ -135,5 +137,43 @@ def get_all_appeal_versions(db: Session, notice_id: int):
 
     if not appeals:
         raise HTTPException(status_code=404, detail="No appeals found.")
+
+    return appeals
+
+from app.models.appeal_versions import AppealVersion
+from app.models.notice import Notice
+from app.models.client import Client
+
+
+def get_all_appeals(db: Session):
+
+    results = (
+        db.query(
+            AppealVersion.id,
+            AppealVersion.notice_id,
+            AppealVersion.version_number,
+            AppealVersion.created_at,
+            Notice.notice_number,
+            Notice.section_reference,
+            Client.name.label("client_name"),
+        )
+        .join(Notice, Notice.id == AppealVersion.notice_id)
+        .join(Client, Client.id == Notice.client_id)
+        .order_by(AppealVersion.created_at.desc())
+        .all()
+    )
+
+    appeals = []
+
+    for r in results:
+        appeals.append({
+            "id": r.id,
+            "notice_id": r.notice_id,
+            "version_number": r.version_number,
+            "created_at": r.created_at,
+            "notice_number": r.notice_number,
+            "section_reference": r.section_reference,
+            "client_name": r.client_name
+        })
 
     return appeals

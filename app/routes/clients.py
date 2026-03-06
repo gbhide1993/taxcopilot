@@ -7,6 +7,7 @@ from app.dependencies.auth import get_current_user
 from app.dependencies.role_guard import require_role
 from app.models.client import Client
 from app.services.compliance_service import get_client_compliance_summary
+from app.services.client_service import get_client_notice_history
 
 router = APIRouter(prefix="/clients", tags=["Clients"])
 
@@ -72,3 +73,20 @@ def get_client_detail(
         raise HTTPException(status_code=404, detail="Client not found")
 
     return client
+
+
+@router.get("/")
+def list_clients(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    return get_clients(db)
+
+
+@router.get("/{client_id}/notices")
+def client_notices(
+    client_id: int,
+    db: Session = Depends(get_db)
+):
+
+    return get_client_notice_history(db, client_id)

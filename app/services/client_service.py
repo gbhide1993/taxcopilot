@@ -8,6 +8,7 @@ from app import models
 
 
 
+
 def create_client(db: Session, client_data, user_id: int):
     new_client = Client(
         name=client_data.name,
@@ -106,3 +107,39 @@ def list_clients(db):
         clients.append(client)
 
     return clients
+
+
+def get_client_notice_history(db: Session, client_id: int):
+
+    notices = (
+        db.query(
+            Notice.id,
+            Notice.notice_number,
+            Notice.section_reference,
+            Notice.status,
+            Notice.received_date,
+            Notice.assigned_to,
+            NoticeRiskMetadata.risk_score
+        )
+        .outerjoin(
+            NoticeRiskMetadata,
+            NoticeRiskMetadata.notice_id == Notice.id
+        )
+        .filter(Notice.client_id == client_id)
+        .order_by(Notice.received_date.desc())
+        .all()
+    )
+
+    results = []
+
+    for n in notices:
+        results.append({
+            "id": n.id,
+            "notice_number": n.notice_number,
+            "section_reference": n.section_reference,
+            "risk_score": float(n.risk_score) if n.risk_score else 0,
+            "status": n.status,
+            "received_date": n.received_date
+        })
+
+    return results

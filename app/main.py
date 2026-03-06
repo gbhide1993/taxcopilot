@@ -8,7 +8,11 @@ from app.models.user import User
 from app.dependencies.auth import get_current_user
 from app.routes import auth
 from app.models import user, client, notice, document, document_chunk
-from app.routes import clients, notices, documents, search, rag, system, users, sections, drafts, risk, dashboard, appeals, settings
+from app.routes import (clients, notices, documents, 
+                        search, rag, system, 
+                        users, sections, drafts, risk, 
+                        dashboard, appeals, settings, reports,
+                        reports_export, activity)
 from app.dependencies.license_guard import check_license
 
 
@@ -60,6 +64,12 @@ app.include_router(dashboard.router)
 app.include_router(appeals.router)
 
 app.include_router(settings.router)
+
+app.include_router(reports.router)
+
+app.include_router(reports_export.router)
+
+app.include_router(activity.router)
 
 @app.get("/health")
 def health_check():

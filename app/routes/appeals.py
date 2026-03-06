@@ -8,13 +8,19 @@ from app.services.appeal_service import generate_appeal
 from app.schemas.appeal_schema import AppealResponse, AppealVersionListResponse
 from app.services.appeal_service import (
     get_latest_appeal,
-    get_all_appeal_versions
+    get_all_appeal_versions,
+    get_all_appeals,
 )
 
 from app.services.export_service import generate_appeal_docx
 
 router = APIRouter(prefix="/appeals", tags=["Appeals"])
 
+@router.get("/")
+def list_all_appeals(
+    db: Session = Depends(get_db)
+):
+    return get_all_appeals(db)
 
 @router.post("/generate/{notice_id}")
 def generate_appeal_endpoint(

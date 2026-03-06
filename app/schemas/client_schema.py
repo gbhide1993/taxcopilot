@@ -15,6 +15,9 @@ class ClientResponse(BaseModel):
     pan: str
     email: Optional[str]
     phone: Optional[str]
+    notice_count: Optional[int] = 0
+    risk_score: Optional[float] = 0
+
 
     class Config:
         orm_mode = True

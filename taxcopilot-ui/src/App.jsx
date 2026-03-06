@@ -20,6 +20,7 @@ import Appeals from "./pages/Appeals";
 import RiskMonitor from "./pages/RiskMonitor";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Activity from "./pages/Activity";
 import Login from "./pages/Login";
 
 
@@ -58,6 +59,8 @@ const LayoutWrapper = () => {
             { key: "/risk", icon: <WarningOutlined />, label: "Risk Monitor" },
             { key: "/reports", icon: <BarChartOutlined />, label: "Reports" },
             { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
+            { key: "/activity", icon: <BarChartOutlined />, label: "Activity Log" },
+            
           ]}
         />
       </Sider>
@@ -89,6 +92,7 @@ const LayoutWrapper = () => {
             <Route path="/settings" element={<Settings />} />
             <Route path="/login" element={<Login />} />
             <Route path="/risk-monitor" element={<RiskMonitor />} />
+            <Route path="/activity" element={<Activity />} />
           </Routes>
         </Content>
       </Layout>

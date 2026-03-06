@@ -3,17 +3,26 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.draft_service import (generate_structured_draft, 
                                         get_latest_draft,
-                                        get_all_draft_versions)
+                                        get_all_draft_versions,
+                                        get_all_drafts)
 from app.schemas.draft_schema import (DraftResponse,
                                       DraftVersionListResponse)
 
 from fastapi.responses import StreamingResponse
 from app.services.export_service import generate_draft_docx
+from app.models.draft_version import DraftVersion
+from app.models.notice import Notice
 
 router = APIRouter(
     prefix="/draft",
     tags=["Draft"]
 )
+
+@router.get("/")
+def list_all_drafts(
+    db: Session = Depends(get_db)
+):
+    return get_all_drafts(db)
 
 
 @router.post("/generate/{notice_id}", response_model=DraftResponse)
@@ -56,3 +65,6 @@ def export_draft(
             "Content-Disposition": f"attachment; filename={filename}"
         }
     )
+
+
+   

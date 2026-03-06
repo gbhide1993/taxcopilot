@@ -1,112 +1,130 @@
-import { Card, Row, Col, Table, Tag } from "antd";
 import { useEffect, useState } from "react";
+import { Card, Row, Col, Table } from "antd";
 import api from "../api/axios";
-import dayjs from "dayjs";
 
 const Dashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [workQueue, setWorkQueue] = useState([]);
+
+  const [stats, setStats] = useState({
+    total_notices: 0,
+    high_risk: 0,
+    overdue: 0,
+    unassigned: 0
+  });
+
+  const [topClients, setTopClients] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  const fetchDashboard = async () => {
 
-  const fetchDashboardData = async () => {
     try {
+
       setLoading(true);
 
-      const [monitorRes, queueRes] = await Promise.all([
-        api.get("/risk/monitor"),
-        api.get("/risk/work-queue"),
-      ]);
+      const res = await api.get("/dashboard/");
 
-      setStats(monitorRes.data);
+      const d = res.data || {};
 
-      setWorkQueue(
-        queueRes.data.map((item) => ({
-          key: item.notice_id,
-          notice: item.notice_number,
-          dueDate: dayjs(item.due_date).format("DD MMM YYYY"),
-          risk: item.risk_score,
-          priority: item.priority,
-        }))
-      );
-    } catch (error) {
-      console.error(error);
+      setStats({
+        total_notices: d.total_notices || 0,
+        high_risk: d.high_risk || 0,
+        overdue: d.overdue || 0,
+        unassigned: d.unassigned || 0
+      });
+
+      setTopClients(d.top_clients || []);
+
+    } catch (err) {
+
+      console.error("Dashboard load failed", err);
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
 
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
   const columns = [
-    { title: "Notice Number", dataIndex: "notice" },
-    { title: "Due Date", dataIndex: "dueDate" },
+
     {
-      title: "Risk Score",
-      dataIndex: "risk",
-      render: (risk) => {
-        if (risk >= 4) return <Tag color="red">{risk.toFixed(2)}</Tag>;
-        if (risk >= 2.5) return <Tag color="orange">{risk.toFixed(2)}</Tag>;
-        return <Tag color="green">{risk.toFixed(2)}</Tag>;
-      },
+      title: "Client",
+      dataIndex: "client",
+      width: 300
     },
+
     {
-      title: "Priority",
-      dataIndex: "priority",
-      render: (priority) => {
-        if (priority === 1) return <Tag color="red">Critical</Tag>;
-        if (priority === 2) return <Tag color="volcano">High</Tag>;
-        if (priority === 3) return <Tag color="orange">Due Soon</Tag>;
-        return <Tag color="blue">Medium</Tag>;
-      },
-    },
+      title: "Notices",
+      dataIndex: "count",
+      width: 150
+    }
+
   ];
 
-  const statCards = stats
-    ? [
-        { title: "Total Notices", value: stats.total },
-        { title: "High Risk", value: stats.high, color: "red" },
-        { title: "Medium Risk", value: stats.medium, color: "orange" },
-        { title: "Low Risk", value: stats.low, color: "green" },
-        { title: "Overdue + High", value: stats.overdue_high, color: "crimson" },
-      ]
-    : [];
-
   return (
+
     <div>
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        {statCards.map((item, index) => (
-          <Col span={4} key={index}>
-            <Card size="small">
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 600,
-                  color: item.color || "#000",
-                }}
-              >
-                {item.value}
-              </div>
-              <div style={{ fontSize: 13, color: "#666" }}>
-                {item.title}
-              </div>
-            </Card>
-          </Col>
-        ))}
+
+      {/* KPI Cards */}
+
+      <Row gutter={16} style={{ marginBottom: 20 }}>
+
+        <Col span={6}>
+          <Card size="small">
+            Total Active
+            <h2>{stats.total_notices}</h2>
+          </Card>
+        </Col>
+
+        <Col span={6}>
+          <Card size="small">
+            High Risk
+            <h2 style={{ color:"#fa8c16" }}>
+              {stats.high_risk}
+            </h2>
+          </Card>
+        </Col>
+
+        <Col span={6}>
+          <Card size="small">
+            Overdue
+            <h2 style={{ color:"#ff4d4f" }}>
+              {stats.overdue}
+            </h2>
+          </Card>
+        </Col>
+
+        <Col span={6}>
+          <Card size="small">
+            Unassigned
+            <h2>{stats.unassigned}</h2>
+          </Card>
+        </Col>
+
       </Row>
 
-      <Card size="small" title="Priority Work Queue">
+      {/* Top Clients */}
+
+      <Card title="Top Clients by Notices">
+
         <Table
+          rowKey="client"
           columns={columns}
-          dataSource={workQueue}
-          pagination={false}
-          size="small"
+          dataSource={topClients}
           loading={loading}
+          pagination={false}
         />
+
       </Card>
+
     </div>
+
   );
+
 };
 
 export default Dashboard;

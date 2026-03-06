@@ -22,3 +22,14 @@ def log_action(
 
     db.add(audit_entry)
     db.commit()
+
+def get_activity_logs(db):
+
+    logs = (
+        db.query(AuditLog)
+        .order_by(AuditLog.created_at.desc())
+        .limit(200)
+        .all()
+    )
+
+    return logs

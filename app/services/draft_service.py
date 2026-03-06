@@ -4,6 +4,7 @@ from app.models.notice import Notice
 from app.services.section_service import get_section_by_act_and_number
 from app.models.draft_version import DraftVersion
 from sqlalchemy import func, desc
+from app.models.client import Client
 
 
 
@@ -160,3 +161,38 @@ def get_all_draft_versions(db: Session, notice_id: int):
         "notice_id": notice_id,
         "versions": drafts
     }
+
+
+def get_all_drafts(db: Session):
+
+    results = (
+        db.query(
+            DraftVersion.id,
+            DraftVersion.notice_id,
+            DraftVersion.version_number,
+            DraftVersion.created_at,
+            Notice.notice_number,
+            Notice.section_reference,
+            Client.name.label("client_name")
+        )
+        .join(Notice, Notice.id == DraftVersion.notice_id)
+        .join(Client, Client.id == Notice.client_id)
+        .order_by(DraftVersion.created_at.desc())
+        .all()
+    )
+
+    drafts = []
+
+    for r in results:
+
+        drafts.append({
+            "id": r.id,
+            "notice_id": r.notice_id,
+            "version_number": r.version_number,
+            "created_at": r.created_at,
+            "notice_number": r.notice_number,
+            "section_reference": r.section_reference,
+            "client_name": r.client_name
+        })
+
+    return drafts
