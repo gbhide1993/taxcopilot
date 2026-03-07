@@ -7,7 +7,10 @@ import {
   Form,
   Input,
   Select,
-  message
+  message,
+  Drawer,
+  List,
+  Divider
 } from "antd";
 
 import { useState, useEffect } from "react";
@@ -18,9 +21,10 @@ const Clients = () => {
   const [data,setData] = useState([]);
   const [users,setUsers] = useState([]);
   const [loading,setLoading] = useState(false);
+
   const [drawerOpen,setDrawerOpen] = useState(false);
   const [selectedClient,setSelectedClient] = useState(null);
-  const [clientNotices,setClientNotices] = useState([]);
+  const [clientHistory,setClientHistory] = useState(null);
 
   const [modalOpen,setModalOpen] = useState(false);
   const [editingClient,setEditingClient] = useState(null);
@@ -56,6 +60,31 @@ const Clients = () => {
   useEffect(()=>{
     fetchClients();
   },[]);
+
+
+  /* ---------------- Drawer Logic ---------------- */
+
+  const openClientDrawer = async(client)=>{
+
+    try{
+
+      setSelectedClient(client);
+      setDrawerOpen(true);
+
+      const res = await api.get(`/clients/${client.id}/compliance-summary`);
+
+      setClientHistory(res.data);
+
+    }catch{
+
+      message.error("Failed to load client history");
+
+    }
+
+  };
+
+
+  /* ---------------- Modal Logic ---------------- */
 
   const openCreateModal = ()=>{
 
@@ -110,11 +139,19 @@ const Clients = () => {
 
   };
 
+
+  /* ---------------- Table Columns ---------------- */
+
   const columns = [
 
     {
       title:"Client Name",
-      dataIndex:"name"
+      dataIndex:"name",
+      render:(v,record)=>(
+        <a onClick={()=>openClientDrawer(record)}>
+          {v}
+        </a>
+      )
     },
 
     {
@@ -122,17 +159,16 @@ const Clients = () => {
       dataIndex:"pan"
     },
 
-
     {
-    title:"Email",
-    dataIndex:"email",
-    render:(v)=>v || "—"
+      title:"Email",
+      dataIndex:"email",
+      render:(v)=>v || "—"
     },
 
     {
-    title:"Mobile",
-    dataIndex:"phone",
-    render:(v)=>v || "—"
+      title:"Mobile",
+      dataIndex:"phone",
+      render:(v)=>v || "—"
     },
 
     {
@@ -180,6 +216,8 @@ const Clients = () => {
 
   ];
 
+
+
   return(
 
     <div>
@@ -207,6 +245,56 @@ const Clients = () => {
 
       </Card>
 
+
+
+      {/* ---------------- Drawer ---------------- */}
+
+      <Drawer
+        title={selectedClient?.name}
+        open={drawerOpen}
+        onClose={()=>setDrawerOpen(false)}
+        width={500}
+      >
+
+        <Divider>Notices</Divider>
+
+        <List
+          dataSource={clientHistory?.notices || []}
+          renderItem={(item)=>(
+            <List.Item>
+              Notice #{item.notice_number} – {item.section_reference}
+            </List.Item>
+          )}
+        />
+
+        <Divider>Drafts</Divider>
+
+        <List
+          dataSource={clientHistory?.drafts || []}
+          renderItem={(item)=>(
+            <List.Item>
+              Draft Version {item.version_number}
+            </List.Item>
+          )}
+        />
+
+        <Divider>Appeals</Divider>
+
+        <List
+          dataSource={clientHistory?.appeals || []}
+          renderItem={(item)=>(
+            <List.Item>
+              Appeal Version {item.version_number}
+            </List.Item>
+          )}
+        />
+
+      </Drawer>
+
+
+
+      {/* ---------------- Modal ---------------- */}
+
       <Modal
         title={editingClient?"Edit Client":"Add Client"}
         open={modalOpen}
@@ -231,14 +319,14 @@ const Clients = () => {
             <Input/>
           </Form.Item>
 
-        <Form.Item
+          <Form.Item
             label="E-mail"
             name="email"
           >
             <Input/>
           </Form.Item>
 
-        <Form.Item
+          <Form.Item
             label="Mobile"
             name="phone"
           >

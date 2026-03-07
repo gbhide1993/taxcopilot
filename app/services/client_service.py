@@ -1,61 +1,40 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+
 from app.models.client import Client
 from app.models.notice import Notice
 from app.models.notice_risk_metadata import NoticeRiskMetadata
-from sqlalchemy import or_, func
-from app.services.audit_service import log_action
-from app import models
+from app.models.draft_version import DraftVersion
+from app.models.appeal_versions import AppealVersion
 
 
+# ----------------------------------------------------
+# CREATE CLIENT
+# ----------------------------------------------------
 
+def create_client(db: Session, client, user_id):
 
-def create_client(db: Session, client_data, user_id: int):
     new_client = Client(
-        name=client_data.name,
-        pan=client_data.pan,
-        email=client_data.email,
-        phone=client_data.phone,
-        created_by=user_id,
-        assigned_to=user_id  # optional: auto-assign creator
+        name=client.name,
+        pan=client.pan,
+        email=client.email,
+        phone=client.phone,
+        assigned_to=user_id
     )
 
     db.add(new_client)
     db.commit()
     db.refresh(new_client)
 
-    # 🔥 Audit Log
-    log_action(
-        db=db,
-        user_id=user_id,
-        role_name=new_client.owner.role.name if new_client.owner else "UNKNOWN",
-        action="CREATE_CLIENT",
-        entity_type="Client",
-        entity_id=new_client.id,
-        details={"client_name": new_client.name}
-    )
-
     return new_client
 
 
+# ----------------------------------------------------
+# UPDATE CLIENT
+# ----------------------------------------------------
 
-def get_clients(db, current_user):
-    print("USER ROLE OBJECT:", current_user.role)
-    print("ROLE NAME:", current_user.role.name)
-    role_name = current_user.role.name
+def update_client(db: Session, client_id, client_data, user_id):
 
-    # ADMIN & SENIOR_CA can see all clients
-    if role_name in ["ADMIN", "SENIOR_CA"]:
-        return db.query(models.Client).all()
-
-    # Other roles can only see assigned clients
-    return (
-        db.query(models.Client)
-        .filter(models.Client.assigned_to == current_user.id)
-        .all()
-    )
-
-
-def update_client(db: Session, client_id: int, client_data, user_id: int):
     client = db.query(Client).filter(Client.id == client_id).first()
 
     if not client:
@@ -65,51 +44,106 @@ def update_client(db: Session, client_id: int, client_data, user_id: int):
     client.pan = client_data.pan
     client.email = client_data.email
     client.phone = client_data.phone
+    client.assigned_to = user_id
 
     db.commit()
     db.refresh(client)
 
-    # 🔥 Audit Log
-    log_action(
-        db=db,
-        user_id=user_id,
-        role_name=client.owner.role.name if client.owner else "UNKNOWN",
-        action="UPDATE_CLIENT",
-        entity_type="Client",
-        entity_id=client.id,
-        details={"updated_name": client.name}
-    )
-
     return client
 
 
-def list_clients(db):
+# ----------------------------------------------------
+# GET CLIENT LIST (NOTICE COUNT + RISK)
+# ----------------------------------------------------
+
+def get_clients(db: Session):
 
     results = (
         db.query(
-            Client,
+            Client.id,
+            Client.name,
+            Client.pan,
+            Client.email,
+            Client.phone,
+            Client.assigned_to,
+
             func.count(Notice.id).label("notice_count"),
-            func.max(NoticeRiskMetadata.risk_score).label("max_risk")
+            func.avg(NoticeRiskMetadata.risk_score).label("risk_score")
         )
         .outerjoin(Notice, Notice.client_id == Client.id)
-        .outerjoin(NoticeRiskMetadata, NoticeRiskMetadata.notice_id == Notice.id)
+        .outerjoin(
+            NoticeRiskMetadata,
+            NoticeRiskMetadata.notice_id == Notice.id
+        )
         .group_by(Client.id)
+        .order_by(Client.name)
         .all()
     )
 
     clients = []
 
-    for client, notice_count, max_risk in results:
+    for r in results:
 
-        client.notice_count = notice_count or 0
-        client.risk_score = float(max_risk) if max_risk else 0
+        risk_level = "Low"
 
-        clients.append(client)
+        if r.risk_score:
+
+            if r.risk_score >= 4:
+                risk_level = "Critical"
+            elif r.risk_score >= 3:
+                risk_level = "High"
+            elif r.risk_score >= 2:
+                risk_level = "Medium"
+
+        clients.append({
+            "id": r.id,
+            "name": r.name,
+            "pan": r.pan,
+            "email": r.email,
+            "phone": r.phone,
+            "assigned_to": r.assigned_to,
+            "notice_count": int(r.notice_count or 0),
+            "risk_exposure": risk_level
+        })
 
     return clients
 
 
+# ----------------------------------------------------
+# CLIENT NOTICE HISTORY
+# ----------------------------------------------------
+
 def get_client_notice_history(db: Session, client_id: int):
+
+    notices = (
+        db.query(Notice)
+        .filter(Notice.client_id == client_id)
+        .order_by(Notice.received_date.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": n.id,
+            "notice_number": n.notice_number,
+            "section": n.section_reference,
+            "status": n.status,
+            "received_date": str(n.received_date),
+            "due_date": str(n.due_date)
+        }
+        for n in notices
+    ]
+
+
+# ----------------------------------------------------
+# CLIENT COMPLIANCE SUMMARY (DRAWER)
+# ----------------------------------------------------
+
+def get_client_compliance_summary(client_id: int, db: Session):
+
+    # -------------------
+    # Notices
+    # -------------------
 
     notices = (
         db.query(
@@ -118,28 +152,81 @@ def get_client_notice_history(db: Session, client_id: int):
             Notice.section_reference,
             Notice.status,
             Notice.received_date,
-            Notice.assigned_to,
-            NoticeRiskMetadata.risk_score
-        )
-        .outerjoin(
-            NoticeRiskMetadata,
-            NoticeRiskMetadata.notice_id == Notice.id
+            Notice.due_date
         )
         .filter(Notice.client_id == client_id)
         .order_by(Notice.received_date.desc())
         .all()
     )
 
-    results = []
-
-    for n in notices:
-        results.append({
+    notice_data = [
+        {
             "id": n.id,
             "notice_number": n.notice_number,
-            "section_reference": n.section_reference,
-            "risk_score": float(n.risk_score) if n.risk_score else 0,
+            "section": n.section_reference,
             "status": n.status,
-            "received_date": n.received_date
-        })
+            "received_date": str(n.received_date),
+            "due_date": str(n.due_date)
+        }
+        for n in notices
+    ]
 
-    return results
+    # -------------------
+    # Drafts
+    # -------------------
+
+    drafts = (
+        db.query(
+            DraftVersion.id,
+            DraftVersion.version_number,
+            DraftVersion.created_at,
+            Notice.notice_number
+        )
+        .join(Notice, Notice.id == DraftVersion.notice_id)
+        .filter(Notice.client_id == client_id)
+        .order_by(DraftVersion.created_at.desc())
+        .all()
+    )
+
+    draft_data = [
+        {
+            "id": d.id,
+            "notice_number": d.notice_number,
+            "version": d.version_number,
+            "created_at": str(d.created_at)
+        }
+        for d in drafts
+    ]
+
+    # -------------------
+    # Appeals
+    # -------------------
+
+    appeals = (
+        db.query(
+            AppealVersion.id,
+            AppealVersion.version_number,
+            AppealVersion.created_at,
+            Notice.notice_number
+        )
+        .join(Notice, Notice.id == AppealVersion.notice_id)
+        .filter(Notice.client_id == client_id)
+        .order_by(AppealVersion.created_at.desc())
+        .all()
+    )
+
+    appeal_data = [
+        {
+            "id": a.id,
+            "notice_number": a.notice_number,
+            "version": a.version_number,
+            "created_at": str(a.created_at)
+        }
+        for a in appeals
+    ]
+
+    return {
+        "notices": notice_data,
+        "drafts": draft_data,
+        "appeals": appeal_data
+    }
