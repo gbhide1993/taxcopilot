@@ -1,4 +1,4 @@
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Button } from "antd";
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -8,6 +8,7 @@ import {
   WarningOutlined,
   BarChartOutlined,
   SettingOutlined,
+  LogoutOutlined
 } from "@ant-design/icons";
 
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
@@ -23,20 +24,26 @@ import Settings from "./pages/Settings";
 import Activity from "./pages/Activity";
 import Login from "./pages/Login";
 
-
 const { Header, Sider, Content } = Layout;
 
 const LayoutWrapper = () => {
+
   const token = localStorage.getItem("access_token");
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    navigate("/login");
+  };
+
   if (!token && location.pathname !== "/login") {
-  navigate("/login");
-}
+    navigate("/login");
+  }
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
+
       <Sider
         width={220}
         style={{
@@ -62,25 +69,59 @@ const LayoutWrapper = () => {
             { key: "/reports", icon: <BarChartOutlined />, label: "Reports" },
             { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
             { key: "/activity", icon: <BarChartOutlined />, label: "Activity Log" },
-            
           ]}
         />
       </Sider>
 
       <Layout>
+
         <Header
-          style={{
-            background: "#fff",
-            padding: "0 16px",
-            borderBottom: "1px solid #f0f0f0",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ fontWeight: 500 }}>TaxCopilot Enterprise</div>
-          <div>Firm License: Active</div>
-        </Header>
+  style={{
+    background: "#fff",
+    padding: "0 20px",
+    borderBottom: "1px solid #f0f0f0",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }}
+>
+
+  {/* Left side */}
+
+  <div style={{ fontWeight: 600, fontSize: 16 }}>
+    TaxCopilot Enterprise
+  </div>
+
+
+  {/* Right side */}
+
+  <div style={{ display:"flex", alignItems:"center", gap:20 }}>
+
+    <div style={{ color:"#666" }}>
+      Firm: ABC & Co.
+    </div>
+
+    <span
+      style={{
+        fontSize:18,
+        cursor:"pointer"
+      }}
+      title="Notifications"
+    >
+      🔔
+    </span>
+
+    <Button
+      icon={<LogoutOutlined />}
+      danger
+      onClick={handleLogout}
+    >
+      Logout
+    </Button>
+
+  </div>
+
+</Header>
 
         <Content style={{ padding: "24px", background: "#f5f7fb", minHeight: "100vh" }}>
           <Routes>
@@ -97,6 +138,7 @@ const LayoutWrapper = () => {
             <Route path="/activity" element={<Activity />} />
           </Routes>
         </Content>
+
       </Layout>
     </Layout>
   );
