@@ -81,8 +81,8 @@ const columns = [
 
   return (
 
-    <Card title="Draft Repository">
-
+    <Card title="Draft Repository" className="app-card">
+      <div className="app-table">
       <Table
         rowKey="id"
         columns={columns}
@@ -90,7 +90,7 @@ const columns = [
         loading={loading}
         pagination={{ pageSize:20 }}
       />
-
+      </div>
     </Card>
 
   );

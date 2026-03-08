@@ -12,7 +12,7 @@ from app.routes import (clients, notices, documents,
                         search, rag, system, 
                         users, sections, drafts, risk, 
                         dashboard, appeals, settings, reports,
-                        reports_export, activity, deadlines, workload)
+                        reports_export, activity, deadlines, workload, sla, intelligence)
 from app.dependencies.license_guard import check_license
 
 
@@ -69,6 +69,10 @@ app.include_router(activity.router)
 app.include_router(deadlines.router)
 
 app.include_router(workload.router)
+
+app.include_router(sla.router)
+
+app.include_router(intelligence.router, dependencies=[Depends(check_license)])
 
 @app.get("/health")
 def health_check():

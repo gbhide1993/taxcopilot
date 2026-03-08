@@ -220,9 +220,9 @@ const Clients = () => {
 
   return(
 
-    <div>
+    <div className="page-container">
 
-      <Card
+      <Card className="app-card"
         size="small"
         title="Clients"
         extra={
@@ -234,7 +234,7 @@ const Clients = () => {
           </Button>
         }
       >
-
+        <div className="app-table">
         <Table
           rowKey="id"
           columns={columns}
@@ -242,7 +242,7 @@ const Clients = () => {
           loading={loading}
           pagination={{pageSize:10}}
         />
-
+        </div>
       </Card>
 
 

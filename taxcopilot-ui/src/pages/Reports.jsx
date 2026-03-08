@@ -56,21 +56,21 @@ const Reports = () => {
       <Row gutter={16} style={{ marginBottom: 20 }}>
 
         <Col span={8}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             Total Notices
             <h2>{data.total_notices}</h2>
           </Card>
         </Col>
 
         <Col span={8}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             High Risk
             <h2>{data.high_risk}</h2>
           </Card>
         </Col>
 
         <Col span={8}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             Overdue
             <h2>{data.overdue}</h2>
           </Card>
@@ -84,6 +84,7 @@ const Reports = () => {
 
       <Card
         title="Export Reports"
+        className="app-card"
         style={{ marginBottom: 20 }}
       >
 
@@ -139,9 +140,10 @@ const Reports = () => {
 
       <Card
         title="Notices by Client"
+        className="app-card"
         style={{ marginBottom: 20 }}
       >
-
+        <div className="app-table">
         <Table
           rowKey="client"
           dataSource={data.client_distribution}
@@ -158,15 +160,15 @@ const Reports = () => {
             }
           ]}
         />
-
+        </div>
       </Card>
 
       {/* =========================
          SECTION DISTRIBUTION
       ========================== */}
 
-      <Card title="Notices by Section">
-
+      <Card title="Notices by Section" className="app-card">
+        <div className="app-table">
         <Table
           rowKey="section"
           dataSource={data.section_distribution}
@@ -183,7 +185,7 @@ const Reports = () => {
             }
           ]}
         />
-
+        </div>
       </Card>
 
     </div>

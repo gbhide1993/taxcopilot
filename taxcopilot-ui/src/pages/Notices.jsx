@@ -464,7 +464,7 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
   ];
 
   return (
-    <div>
+    <div className="page-container">
         <Row style={{ marginBottom: 16 }}>
             <Col>
                 <Button type="primary" onClick={() => setUploadOpen(true)}>
@@ -472,7 +472,7 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
                 </Button>
             </Col>
         </Row>
-      <Card size="small" style={{ marginBottom: 16 }}>
+      <Card className="app-card" size="small" style={{ marginBottom: 16 }}>
         <Form layout="vertical">
           <Row gutter={16}>
             <Col span={4}>
@@ -597,7 +597,8 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
         </Form>
       </Card>
 
-      <Card size="small">
+      <Card className="app-card" size="small">
+        <div className="app-table">
         <Table
           columns={columns}
           dataSource={data}
@@ -630,6 +631,7 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
             return "";
             }}
         />
+        </div>
       </Card>
 
       <Drawer
@@ -701,6 +703,7 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
     Generate Draft
   </Button>
    
+  
   <Table
     size="small"
     rowKey="version_number"
@@ -718,7 +721,7 @@ const handleExportAppeal = async (noticeId, versionNumber) => {
             timeline.some((e) => e.event_type === "AUTO_DRAFT");
 
             return (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="page-container" style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span>V{v}</span>
                 {isAuto && (
                 <Tag color="green" bordered={false}>

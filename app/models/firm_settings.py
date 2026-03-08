@@ -16,3 +16,11 @@ class FirmSettings(Base):
 
     auto_assign_high_risk = Column(Boolean, default=False)
     high_risk_threshold = Column(Float, default=3.00)
+
+    
+    # SLA SETTINGS
+    draft_sla_days = Column(Integer, default=2)
+    review_sla_days = Column(Integer, default=1)
+    submission_sla_days = Column(Integer, default=1)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -70,8 +70,8 @@ const Activity = () => {
 ];
 
   return(
-
-    <Card title="Firm Activity Log">
+   <div className="page-container">
+    <Card title="Firm Activity Log" className="app-card">
 
       <Table
         rowKey="id"
@@ -80,8 +80,9 @@ const Activity = () => {
         loading={loading}
         pagination={{pageSize:20}}
       />
-
+   
     </Card>
+    </div>
 
   );
 

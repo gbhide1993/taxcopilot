@@ -85,7 +85,7 @@ const Appeals = () => {
 
   return(
 
-    <Card title="Appeal Repository">
+    <Card title="Appeal Repository" className="app-card">
 
       <Table
         rowKey="id"

@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Table } from "antd";
+import { Card, Row, Col, Table, Alert, Space } from "antd";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import "../styles/dashboard.css";
 
 const Dashboard = () => {
+
+  const navigate = useNavigate();
 
   const [stats, setStats] = useState({
     total_notices: 0,
@@ -18,20 +22,30 @@ const Dashboard = () => {
     due_7_days: 0
   });
 
+  const [sla, setSla] = useState({
+    draft_pending: 0,
+    review_pending: 0,
+    submission_pending: 0,
+    breached: 0
+  });
+
+  const [intelligence, setIntelligence] = useState({
+    top_sections: [],
+    top_clients: [],
+    avg_resolution_days: 0
+  });
+
   const [topClients, setTopClients] = useState([]);
   const [urgentNotices, setUrgentNotices] = useState([]);
   const [pipeline, setPipeline] = useState({});
   const [workload, setWorkload] = useState([]);
-
   const [clientRisk, setClientRisk] = useState([]);
   const [deadlineBoard, setDeadlineBoard] = useState([]);
-
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchDashboard = async () => {
-
     try {
-
       setLoading(true);
 
       const res = await api.get("/dashboard/");
@@ -48,52 +62,81 @@ const Dashboard = () => {
       setUrgentNotices(d.urgent_notices || []);
       setPipeline(d.pipeline || {});
       setWorkload(d.workload || []);
-
       setClientRisk(d.client_risk || []);
       setDeadlineBoard(d.deadline_board || []);
 
     } catch (err) {
-
       console.error("Dashboard load failed", err);
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   const fetchDeadlines = async () => {
-
     try {
-
       const res = await api.get("/deadlines/");
-      setDeadlines(res.data);
-
+      setDeadlines(res.data || {});
     } catch (err) {
-
       console.error("Deadline monitor failed", err);
-
     }
+  };
+
+  const fetchSLA = async () => {
+    try {
+      const res = await api.get("/sla/monitor");
+      setSla(res.data || {});
+    } catch (err) {
+      console.error("SLA monitor failed", err);
+    }
+  };
+
+  const fetchIntelligence = async () => {
+    try {
+      const res = await api.get("/intelligence/");
+      setIntelligence(res.data || {});
+    } catch (err) {
+      console.error("Intelligence load failed", err);
+    }
+  };
+
+  const generateAlerts = () => {
+
+    const list = [];
+
+    if (deadlines.overdue > 0)
+      list.push(`⚠ ${deadlines.overdue} notices overdue`);
+
+    if (deadlines.due_today > 0)
+      list.push(`⚠ ${deadlines.due_today} notices due today`);
+
+    if (sla.breached > 0)
+      list.push(`⚠ ${sla.breached} SLA breaches`);
+
+    if (stats.unassigned > 0)
+      list.push(`⚠ ${stats.unassigned} notices unassigned`);
+
+    setAlerts(list);
 
   };
 
   useEffect(() => {
+
     fetchDashboard();
     fetchDeadlines();
+    fetchSLA();
+    fetchIntelligence();
+
   }, []);
 
-  const clientColumns = [
-    { title: "Client", dataIndex: "client", width: 300 },
-    { title: "Notices", dataIndex: "count", width: 150 }
-  ];
+  useEffect(() => {
 
-  const urgentColumns = [
+    generateAlerts();
+
+  }, [deadlines, sla, stats]);
+
+  const clientColumns = [
     { title: "Client", dataIndex: "client" },
-    { title: "Section", dataIndex: "section" },
-    { title: "Risk", dataIndex: "risk" },
-    { title: "Due", dataIndex: "due" }
+    { title: "Notices", dataIndex: "count" }
   ];
 
   const workloadColumns = [
@@ -119,117 +162,294 @@ const Dashboard = () => {
 
   return (
 
-    <div>
+    <div className="page-container">
 
-      {/* KPI ROW */}
+      {alerts.length > 0 && (
 
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Space direction="vertical" style={{ width:"100%", marginBottom:20 }}>
+
+          {alerts.map((a, i) => (
+            <Alert
+              key={i}
+              message={a}
+              type="warning"
+              showIcon
+            />
+          ))}
+
+        </Space>
+
+      )}
+
+      {/* Litigation Intelligence (TOP) */}
+      <div className="dashboard-section-title">
+  Litigation Intelligence
+</div>
+
+<Row gutter={16} style={{ marginBottom:20 }}>
+
+  {/* Most Litigated Sections */}
+
+  <Col span={8}>
+    <Card className="app-card">
+
+      <div className="intel-title">
+        Most Litigated Sections
+      </div>
+
+      <div className="app-table">
+
+        {intelligence.top_sections?.map((s,i)=>(
+
+          <div key={i} className="intel-row"
+          onClick={()=>navigate(`/notices?section=${s.section}`)}>
+
+            <div className="intel-name">
+              {s.section || "Unknown Section"}
+            </div>
+
+            <div className="intel-value">
+              {s.count}
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </Card>
+  </Col>
+
+
+  {/* Clients Generating Notices */}
+
+  <Col span={8}>
+    <Card className="app-card">
+
+      <div className="intel-title">
+        Clients Generating Notices
+      </div>
+
+      <div className="app-table">
+
+        {intelligence.top_clients?.map((c,i)=>(
+
+          <div key={i} className="intel-row"
+         onClick={()=>navigate(`/clients?name=${c.client}`)}>
+
+            <div className="intel-name">
+              {c.client}
+            </div>
+
+            <div className="intel-value">
+              {c.count}
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </Card>
+  </Col>
+
+
+  {/* Resolution Time */}
+
+<Col span={8}>
+  <Card
+    className="app-card intel-card clickable-card"
+    onClick={()=>navigate("/risk-monitor")}
+  >
+
+    <div className="intel-title">
+      Litigation Resolution Time
+    </div>
+
+    <div className="intel-big-number">
+      {intelligence.avg_resolution_days || 0} days
+    </div>
+
+    <div className="intel-hint">
+      View delayed matters →
+    </div>
+
+  </Card>
+</Col>
+
+</Row>
+
+      {/* Risk Monitor */}
+
+      <div className="dashboard-section-title">
+        Risk Monitor
+      </div>
+
+      <Row gutter={16} style={{ marginBottom:20 }}>
 
         <Col span={6}>
-          <Card size="small">
+          <Card hoverable className="dashboard-card"
+            onClick={() => navigate("/notices")}>
             Total Active
-            <h2>{stats.total_notices}</h2>
+            <div className="metric-number metric-blue">
+              {stats.total_notices}
+            </div>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card hoverable className="dashboard-card"
+            onClick={() => navigate("/notices?risk_level=high")}>
             High Risk
-            <h2 style={{ color:"#fa8c16" }}>
+            <div className="metric-number metric-orange">
               {stats.high_risk}
-            </h2>
+            </div>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card hoverable className="dashboard-card"
+            onClick={() => navigate("/notices?overdue_only=true")}>
             Overdue
-            <h2 style={{ color:"#ff4d4f" }}>
+            <div className="metric-number metric-red">
               {stats.overdue}
-            </h2>
+            </div>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card hoverable className="dashboard-card"
+            onClick={() => navigate("/notices?unassigned_only=true")}>
             Unassigned
-            <h2>{stats.unassigned}</h2>
+            <div className="metric-number metric-purple">
+              {stats.unassigned}
+            </div>
           </Card>
         </Col>
 
       </Row>
 
+      {/* Deadline Radar */}
 
-      {/* DEADLINE MONITOR */}
+      <div className="dashboard-section-title">
+        Deadline Radar
+      </div>
 
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      <Row gutter={16} style={{ marginBottom:20 }}>
 
         <Col span={6}>
-          <Card size="small">
+          <Card className="dashboard-card">
             Overdue
-            <h2 style={{ color:"#ff4d4f" }}>{deadlines.overdue}</h2>
+            <div className="metric-number metric-red">
+              {deadlines.overdue}
+            </div>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card className="dashboard-card">
             Due Today
-            <h2 style={{ color:"#fa8c16" }}>{deadlines.due_today}</h2>
+            <div className="metric-number metric-orange">
+              {deadlines.due_today}
+            </div>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card className="dashboard-card">
             Due in 3 Days
-            <h2>{deadlines.due_3_days}</h2>
+            <div className="metric-number metric-blue">
+              {deadlines.due_3_days}
+            </div>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card className="dashboard-card">
             Due in 7 Days
-            <h2>{deadlines.due_7_days}</h2>
+            <div className="metric-number metric-blue">
+              {deadlines.due_7_days}
+            </div>
           </Card>
         </Col>
 
       </Row>
 
+      {/* SLA Monitor */}
 
-      {/* TOP CLIENTS */}
+      <div className="dashboard-section-title">
+        SLA Monitor
+      </div>
 
-      <Card title="Top Clients by Notices" style={{ marginBottom: 16 }}>
+      <Row gutter={16} style={{ marginBottom:20 }}>
 
-        <Table
-          rowKey="client"
-          columns={clientColumns}
-          dataSource={topClients}
-          loading={loading}
-          pagination={false}
-          size="small"
-        />
+        <Col span={6}>
+          <Card className="dashboard-card">
+            Draft Pending
+            <div className="metric-number">
+              {sla.draft_pending}
+            </div>
+          </Card>
+        </Col>
 
-      </Card>
+        <Col span={6}>
+          <Card className="dashboard-card">
+            Review Pending
+            <div className="metric-number">
+              {sla.review_pending}
+            </div>
+          </Card>
+        </Col>
 
+        <Col span={6}>
+          <Card className="dashboard-card">
+            Submission Pending
+            <div className="metric-number">
+              {sla.submission_pending}
+            </div>
+          </Card>
+        </Col>
 
-      {/* URGENT NOTICES */}
+        <Col span={6}>
+          <Card className="dashboard-card">
+            SLA Breached
+            <div className="metric-number metric-red">
+              {sla.breached}
+            </div>
+          </Card>
+        </Col>
 
-      <Card title="Urgent Notices" style={{ marginBottom: 16 }}>
+      </Row>
 
+      {/* Deadline Board */}
+
+      <Card title="Next 7 Day Deadline Board" className="dashboard-table-card">
+
+        <div className="app-table">
         <Table
           rowKey="id"
-          columns={urgentColumns}
-          dataSource={urgentNotices}
+          columns={deadlineColumns}
+          dataSource={deadlineBoard}
           pagination={false}
           size="small"
+          onRow={(record) => ({
+            onClick: () => navigate(`/notices/${record.id}`)
+          })}
         />
+        </div>
 
       </Card>
 
+      {/* Client Risk */}
 
-      {/* CLIENT RISK HEAT TABLE */}
+      <Card
+        title="Client Risk Heat Table"
+        className="dashboard-table-card"
+        style={{ marginTop:20 }}>
 
-      <Card title="Client Risk Heat Table" style={{ marginBottom: 16 }}>
-
+        <div className="app-table">    
         <Table
           rowKey="client"
           columns={riskColumns}
@@ -237,66 +457,37 @@ const Dashboard = () => {
           pagination={false}
           size="small"
         />
+        </div>
 
       </Card>
 
-
-      {/* DEADLINE BOARD */}
-
-      <Card title="Next 7 Day Deadline Board" style={{ marginBottom: 16 }}>
-
-        <Table
-          rowKey="id"
-          columns={deadlineColumns}
-          dataSource={deadlineBoard}
-          pagination={false}
-          size="small"
-        />
-
-      </Card>
-
-
-      {/* PIPELINE + WORKLOAD */}
-
-      <Row gutter={16}>
+      <Row gutter={16} style={{ marginTop:20 }}>
 
         <Col span={12}>
 
-          <Card title="Pipeline Status" size="small">
+          <Card title="Top Clients by Notices"
+            className="dashboard-table-card">
 
-            <div style={{ display:"flex", justifyContent:"space-between" }}>
-
-              <div>
-                Open<br/>
-                <b>{pipeline.open || 0}</b>
-              </div>
-
-              <div>
-                In Progress<br/>
-                <b>{pipeline.in_progress || 0}</b>
-              </div>
-
-              <div>
-                Replied<br/>
-                <b>{pipeline.replied || 0}</b>
-              </div>
-
-              <div>
-                Closed<br/>
-                <b>{pipeline.closed || 0}</b>
-              </div>
-
+            <div className="app-table">    
+            <Table
+              rowKey="client"
+              columns={clientColumns}
+              dataSource={topClients}
+              pagination={false}
+              size="small"
+            />
             </div>
 
           </Card>
 
         </Col>
 
-
         <Col span={12}>
 
-          <Card title="Team Workload" size="small">
+          <Card title="Team Workload"
+            className="dashboard-table-card">
 
+            <div className="app-table">
             <Table
               rowKey="ca"
               columns={workloadColumns}
@@ -304,6 +495,7 @@ const Dashboard = () => {
               pagination={false}
               size="small"
             />
+            </div>
 
           </Card>
 

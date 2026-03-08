@@ -38,9 +38,11 @@ const LayoutWrapper = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
-        theme="light"
         width={220}
-        style={{ borderRight: "1px solid #f0f0f0" }}
+        style={{
+          background: "#ffffff",
+          borderRight: "1px solid #e6eaf0"
+        }}
       >
         <div style={{ padding: 16, fontWeight: 600, fontSize: 16 }}>
           TaxCopilot
@@ -80,7 +82,7 @@ const LayoutWrapper = () => {
           <div>Firm License: Active</div>
         </Header>
 
-        <Content style={{ padding: 16, background: "#ffffff" }}>
+        <Content style={{ padding: "24px", background: "#f5f7fb", minHeight: "100vh" }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/notices" element={<Notices />} />

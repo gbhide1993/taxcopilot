@@ -406,35 +406,35 @@ const RiskMonitor = () => {
 
   return (
 
-    <div>
+    <div className="page-container">
 
       {/* KPI CARDS */}
 
       <Row gutter={16} style={{ marginBottom: 16 }}>
 
         <Col span={6}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             🔴 Critical Risk
             <h2>{critical}</h2>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             🟠 High Risk
             <h2>{high}</h2>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             ⚠ Due This Week
             <h2>{dueSoon}</h2>
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card size="small">
+          <Card size="small" className="app-card">
             👤 Unassigned
             <h2>{unassigned}</h2>
           </Card>
@@ -447,7 +447,7 @@ const RiskMonitor = () => {
       <Row gutter={16} style={{ marginBottom: 16 }}>
 
         <Col span={12}>
-          <Card title="Notice Workload by CA" size="small" style={{ height: 240 }}>
+          <Card title="Notice Workload by CA" size="small" className="app-card" style={{ height: 240 }}>
 
             <BarChart
                 layout="vertical"
@@ -465,7 +465,7 @@ const RiskMonitor = () => {
         </Col>
 
         <Col span={12}>
-          <Card title="Section Risk Distribution" size="small">
+          <Card title="Section Risk Distribution" size="small" className="app-card">
 
             <BarChart
                 layout="vertical"
@@ -487,7 +487,7 @@ const RiskMonitor = () => {
         <Row gutter={16} style={{ marginBottom: 16 }}>
 
         <Col span={24}>
-            <Card title="Client Litigation Exposure" size="small">
+            <Card title="Client Litigation Exposure" size="small" className="app-card">
 
             <BarChart
                 layout="vertical"
@@ -512,8 +512,8 @@ const RiskMonitor = () => {
 
       {/* TABLE */}
 
-      <Card size="small">
-
+      <Card size="small" className="app-card">
+        <div className="app-table">
         <Table
           rowKey="id"
           columns={columns}
@@ -531,7 +531,7 @@ const RiskMonitor = () => {
             return "";
           }}
         />
-
+        </div>
       </Card>
 
       {/* DRAWER */}
