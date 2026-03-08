@@ -11,6 +11,13 @@ const Dashboard = () => {
     unassigned: 0
   });
 
+  const [deadlines, setDeadlines] = useState({
+    overdue: 0,
+    due_today: 0,
+    due_3_days: 0,
+    due_7_days: 0
+  });
+
   const [topClients, setTopClients] = useState([]);
   const [urgentNotices, setUrgentNotices] = useState([]);
   const [pipeline, setPipeline] = useState({});
@@ -57,8 +64,24 @@ const Dashboard = () => {
 
   };
 
+  const fetchDeadlines = async () => {
+
+    try {
+
+      const res = await api.get("/deadlines/");
+      setDeadlines(res.data);
+
+    } catch (err) {
+
+      console.error("Deadline monitor failed", err);
+
+    }
+
+  };
+
   useEffect(() => {
     fetchDashboard();
+    fetchDeadlines();
   }, []);
 
   const clientColumns = [
@@ -131,6 +154,41 @@ const Dashboard = () => {
           <Card size="small">
             Unassigned
             <h2>{stats.unassigned}</h2>
+          </Card>
+        </Col>
+
+      </Row>
+
+
+      {/* DEADLINE MONITOR */}
+
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+
+        <Col span={6}>
+          <Card size="small">
+            Overdue
+            <h2 style={{ color:"#ff4d4f" }}>{deadlines.overdue}</h2>
+          </Card>
+        </Col>
+
+        <Col span={6}>
+          <Card size="small">
+            Due Today
+            <h2 style={{ color:"#fa8c16" }}>{deadlines.due_today}</h2>
+          </Card>
+        </Col>
+
+        <Col span={6}>
+          <Card size="small">
+            Due in 3 Days
+            <h2>{deadlines.due_3_days}</h2>
+          </Card>
+        </Col>
+
+        <Col span={6}>
+          <Card size="small">
+            Due in 7 Days
+            <h2>{deadlines.due_7_days}</h2>
           </Card>
         </Col>
 

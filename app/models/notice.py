@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Enum, Text
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Enum, Text, Index
 from sqlalchemy.orm import relationship
 from app.database import Base
 import enum
@@ -38,3 +38,6 @@ class Notice(Base):
     client = relationship("Client")
 
     raw_text = Column(Text, nullable=True)
+
+# Composite index for dashboard queries
+Index("idx_notice_dashboard", Notice.status, Notice.due_date)

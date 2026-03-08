@@ -12,7 +12,7 @@ from app.routes import (clients, notices, documents,
                         search, rag, system, 
                         users, sections, drafts, risk, 
                         dashboard, appeals, settings, reports,
-                        reports_export, activity)
+                        reports_export, activity, deadlines, workload)
 from app.dependencies.license_guard import check_license
 
 
@@ -31,11 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-
-
-
 
 app.include_router(auth.router)
 
@@ -70,6 +65,10 @@ app.include_router(reports.router)
 app.include_router(reports_export.router)
 
 app.include_router(activity.router)
+
+app.include_router(deadlines.router)
+
+app.include_router(workload.router)
 
 @app.get("/health")
 def health_check():

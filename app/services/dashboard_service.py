@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, case
+from sqlalchemy import func, desc, case, and_
 from datetime import date, timedelta
 
 from app.models.notice import Notice
 from app.models.client import Client
 from app.models.user import User
 from app.models.notice_risk_metadata import NoticeRiskMetadata
-
+from app.services.workload_service import get_team_workload
 
 def get_dashboard_summary(db: Session):
 
@@ -153,8 +153,7 @@ def get_dashboard_summary(db: Session):
             func.sum(
                 case(
                     (
-                        (NoticeRiskMetadata.risk_score >= 3)
-                        & (NoticeRiskMetadata.risk_score < 4),
+                        and_(NoticeRiskMetadata.risk_score >= 3, NoticeRiskMetadata.risk_score < 4),
                         1
                     ),
                     else_=0
@@ -164,8 +163,7 @@ def get_dashboard_summary(db: Session):
             func.sum(
                 case(
                     (
-                        (NoticeRiskMetadata.risk_score >= 2)
-                        & (NoticeRiskMetadata.risk_score < 3),
+                        and_(NoticeRiskMetadata.risk_score >= 2, NoticeRiskMetadata.risk_score < 3),
                         1
                     ),
                     else_=0
@@ -174,7 +172,7 @@ def get_dashboard_summary(db: Session):
 
             func.sum(
                 case(
-                    (NoticeRiskMetadata.risk_score < 2, 1),
+                    (and_(NoticeRiskMetadata.risk_score < 2), 1),
                     else_=0
                 )
             ).label("low"),
