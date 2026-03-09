@@ -18,6 +18,8 @@ class NoticeTimeline(Base):
 
     description = Column(Text, nullable=True)
 
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
     created_at = Column(
         TIMESTAMP,
         server_default=text("CURRENT_TIMESTAMP"),

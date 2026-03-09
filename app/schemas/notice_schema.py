@@ -42,6 +42,7 @@ class NoticeResponse(BaseModel):
 
     status: str
     client_id: int
+    client_name: Optional[str] = None
 
     assigned_to: Optional[int] = None
 

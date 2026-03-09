@@ -46,6 +46,7 @@ from app.services.notice_service import (
     list_notices,
     update_notice_status as update_notice_status_service,
     classify_notice,
+    get_client_litigation_exposure,
 )
 from app.services.draft_service import generate_structured_draft
 from app.services.section_service import get_section_by_act_and_number
@@ -392,7 +393,9 @@ def get_notice_detail(
 
     return notice
 
-    
+@router.get("/analytics/client-litigation")
+def client_litigation(db: Session = Depends(get_db)):
+    return get_client_litigation_exposure(db)
 
 
 @router.get("/{notice_id}/timeline")

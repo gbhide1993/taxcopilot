@@ -14,7 +14,7 @@ const Activity = () => {
 
       setLoading(true);
 
-      const res = await api.get("/activity");
+      const res = await api.get("/activity/");
 
       setData(res.data || []);
 
@@ -45,7 +45,7 @@ const Activity = () => {
 
   {
     title: "User",
-    dataIndex: "user_id",
+    dataIndex: "user",
     width: 120
   },
 
@@ -58,6 +58,9 @@ const Activity = () => {
   {
     title: "Description",
     render: (_,record)=>{
+
+      if(record.entity_type === "Notice")
+        return record.details?.description || ""
 
       if(record.entity_type === "Client")
         return `Client: ${record.details?.client_name || ""}`

@@ -102,7 +102,9 @@ const RiskMonitor = () => {
   const workloadData = Object.keys(assigneeMap).map(name => ({
     name,
     notices: assigneeMap[name]
-  }));
+  }))
+    .sort((a,b) => b.notices - a.notices)
+    .slice(0,5);
 
   // -----------------------
   // Section Risk Map
@@ -121,7 +123,9 @@ const RiskMonitor = () => {
   const sectionRiskData = Object.keys(sectionMap).map(sec => ({
     section: sec,
     count: sectionMap[sec]
-  }));
+  }))
+    .sort((a,b) => b.notices - a.notices)
+    .slice(0,5);
 
 // -----------------------
 // Client Litigation Exposure
@@ -131,7 +135,13 @@ const RiskMonitor = () => {
 
     data.forEach(n => {
 
-    const client = n.client_name || `Client ${n.client_id}`;
+    const client = n.client_name || `Client ${n.client_id}`
+      .replace(" Pvt Ltd"," ")
+      .replace(" Pvt"," ")
+      .replace(" Limited"," ")
+      .replace(" LLP"," ")
+      .slice(0,18);
+
 
     clientMap[client] = (clientMap[client] || 0) + 1;
 
@@ -140,7 +150,9 @@ const RiskMonitor = () => {
     const clientRiskData = Object.keys(clientMap).map(name => ({
     name,
     notices: clientMap[name]
-    }));
+    }))
+    .sort((a,b) => b.notices - a.notices)
+    .slice(0,5);
 
   // -----------------------
   // Assign Notice
@@ -470,7 +482,7 @@ const RiskMonitor = () => {
             <BarChart
                 layout="vertical"
                 width={350}
-                height={180}
+                height={250}
                 data={sectionRiskData}
                >
                 <XAxis type="number" />
@@ -487,12 +499,13 @@ const RiskMonitor = () => {
         <Row gutter={16} style={{ marginBottom: 16 }}>
 
         <Col span={24}>
-            <Card title="Client Litigation Exposure" size="small" className="app-card">
+            <Card title="Top Clients by Litigation Exposure" size="small" className="app-card">
 
             <BarChart
                 layout="vertical"
-                width={350}
-                height={180}
+                width={500}
+                height={300}
+                margin={{ left: 40 }}
                 data={clientRiskData}
             >
                 <XAxis type="number"/>

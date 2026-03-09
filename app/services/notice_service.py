@@ -2,7 +2,7 @@ import re
 
 from fastapi import Request
 from app.services.llm_service import generate_answer
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.notice import Notice, NoticeStatus
 from app.services.risk_service import calculate_and_store_risk
 from app.models.notice_risk_metadata import NoticeRiskMetadata
@@ -10,13 +10,16 @@ from datetime import date
 from sqlalchemy.orm import aliased
 from app.models.sections_master import SectionsMaster
 from app.models.user import User
+from app.models.client import Client
 from datetime import date
 from app.services.risk_service import (
     get_risk_drivers,
     get_recommended_action,
     get_risk_severity
 )
-
+from sqlalchemy import func
+from app.models.client import Client
+from app.models.notice_timeline import NoticeTimeline  
 
 
 def create_notice(
@@ -157,9 +160,10 @@ def list_notices(
 
     base_query = (
         db.query(
-            Notice,
-            risk_alias.risk_score,
-            user_alias.full_name.label("assigned_user_name")
+        Notice,
+        risk_alias.risk_score,
+        user_alias.full_name.label("assigned_user_name"),
+        Client.name.label("client_name")
         )
         .outerjoin(
             risk_alias,
@@ -168,6 +172,10 @@ def list_notices(
         .outerjoin(
             user_alias,
             user_alias.id == Notice.assigned_to
+        )
+        .outerjoin(
+            Client,
+            Client.id == Notice.client_id
         )
         .filter(Notice.created_by == user_id)
     )
@@ -234,12 +242,13 @@ def list_notices(
     )
 
     items = []
-    for notice, risk_score, assigned_user_name in results:
+    for notice, risk_score, assigned_user_name, client_name in results:
 
         score = float(risk_score) if risk_score else 0
 
         notice.risk_score = score
         notice.assigned_user_name = assigned_user_name
+        notice.client_name = client_name
 
         notice.risk_drivers = get_risk_drivers(notice)
         notice.recommended_action = get_recommended_action(notice)
@@ -265,9 +274,20 @@ def update_notice_status(db: Session, notice_id: int, status, user_id: int):
     if not notice:
         return None
 
+    old_status = notice.status
+
     notice.status = NoticeStatus(status)
 
-    # 🔥 AUTOMATIC RISK RECALCULATION (before commit)
+    db.add(
+        NoticeTimeline(
+            notice_id=notice.id,
+            event_type="STATUS_CHANGE",
+            description=f"Status changed from {old_status.value} to {status}",
+            user_id=user_id
+        )
+    )
+
+    # Recalculate risk
     calculate_and_store_risk(db, notice.id)
 
     db.commit()
@@ -275,17 +295,45 @@ def update_notice_status(db: Session, notice_id: int, status, user_id: int):
 
     return notice
 
-def assign_notice(db: Session, notice_id: int, assigned_to: int, user_id: int):
-    notice = db.query(Notice).filter(
-        Notice.id == notice_id,
-        Notice.created_by == user_id
-    ).first()
+def assign_notice(db, notice_id, assigned_to, user_id):
 
-    if not notice:
-        return None
+    notice = db.query(Notice).filter(Notice.id == notice_id).first()
+
+    old_assignee = notice.assigned_to
 
     notice.assigned_to = assigned_to
 
+    db.add(
+        NoticeTimeline(
+            notice_id = notice_id,
+            event_type = "ASSIGNMENT_CHANGE",
+            description = f"Assigned changed from {old_assignee} to {assigned_to}",
+            user_id = user_id
+        )
+    )
+
     db.commit()
-    db.refresh(notice)
+
     return notice
+
+
+
+def get_client_litigation_exposure(db):
+    results = (
+        db.query(
+            Client.name.label("client_name"),
+            func.count(Notice.id).label("notice_count")
+        )
+        .join(Notice, Notice.client_id == Client.id)
+        .group_by(Client.name)
+        .order_by(func.count(Notice.id).desc())
+        .all()
+    )
+
+    return [
+        {
+            "client_name": r.client_name,
+            "count": r.notice_count
+        }
+        for r in results
+    ]
