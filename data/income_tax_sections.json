@@ -1,0 +1,16 @@
+[
+  {
+    "act_name": "Income Tax Act 1961",
+    "section_number": "147",
+    "heading": "Income escaping assessment",
+    "full_text": "If the Assessing Officer has reason to believe income escaped assessment...",
+    "penalty_flag": true,
+    "severity_level": 4,
+    "annexure_template": {
+      "annexures": [
+        "Copy of ITR",
+        "Computation Sheet"
+      ]
+    }
+  }
+]

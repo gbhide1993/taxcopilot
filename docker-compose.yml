@@ -1,0 +1,68 @@
+
+services:
+
+  db:
+    image: ankane/pgvector
+    container_name: taxcopilot_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: strongpass123
+      POSTGRES_DB: taxcopilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: taxcopilot_backend
+    restart: always
+    depends_on:
+      - db
+      - ollama
+    environment:
+      DATABASE_URL: postgresql://postgres:strongpass123@db:5432/taxcopilot
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  frontend:
+    build:
+      context: ./taxcopilot-ui
+    container_name: taxcopilot_frontend
+    restart: always
+    ports:
+      - "5173:3000"
+    depends_on:
+      - backend
+
+  ollama:
+    image: ollama/ollama
+    container_name: taxcopilot_ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
+  ollama-init:
+    image: ollama/ollama
+    container_name: taxcopilot_ollama_init
+    depends_on:
+      - ollama
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      echo 'Waiting for Ollama to start...' &&
+      sleep 10 &&
+      echo 'Pulling phi model...' &&
+      ollama pull phi
+      "
+    volumes:
+      - ollama:/root/.ollama
+
+volumes:
+  pgdata:
+  ollama:

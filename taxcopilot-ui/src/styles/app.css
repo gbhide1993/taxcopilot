@@ -1,0 +1,84 @@
+/* ------------------------------ */
+/* GLOBAL BACKGROUND */
+/* ------------------------------ */
+
+body {
+  background: #f5f7fb;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+/* ------------------------------ */
+/* PAGE LAYOUT */
+/* ------------------------------ */
+
+.page-container {
+  padding: 24px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1f2937;
+}
+
+/* ------------------------------ */
+/* PREMIUM CARDS */
+/* ------------------------------ */
+
+.app-card {
+  border-radius: 12px !important;
+  border: 1px solid #e6eaf0 !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+}
+
+.app-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+}
+
+/* ------------------------------ */
+/* TABLE STYLING */
+/* ------------------------------ */
+
+.app-table .ant-table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.app-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.app-table .ant-table-row:hover {
+  cursor: pointer;
+  background: #f7f9fc;
+}
+
+/* ------------------------------ */
+/* INPUTS */
+/* ------------------------------ */
+
+.ant-input,
+.ant-select-selector,
+.ant-input-number {
+  border-radius: 8px !important;
+}
+
+/* ------------------------------ */
+/* BUTTONS */
+/* ------------------------------ */
+
+.ant-btn-primary {
+  border-radius: 8px;
+}
+
+/* ------------------------------ */
+/* ALERTS */
+/* ------------------------------ */
+
+.ant-alert {
+  border-radius: 8px;
+}

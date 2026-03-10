@@ -1,0 +1,1340 @@
+import { useEffect } from "react";
+import { loadFonts } from "./utils";
+import {
+  AlertTriangle,
+  Archive,
+  BookOpen,
+  Calendar,
+  Clock,
+  Copy,
+  Download,
+  Edit,
+  File,
+  FileText,
+  FileType,
+  Hash,
+  History,
+  LayoutDashboard,
+  List,
+  Mail,
+  Paperclip,
+  PenTool,
+  Plus,
+  Printer,
+  Scale,
+  Share2,
+  Trash2,
+  User,
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
+const ALL_FONTS = {
+  "Inter-Thin": 100,
+  "Inter-ExtraLight": 200,
+  "Inter-Light": 300,
+  "Inter-Regular": 400,
+  "Inter-Medium": 500,
+  "Inter-SemiBold": 600,
+  "Inter-Bold": 700,
+  "Inter-ExtraBold": 800,
+  "Inter-Black": 900,
+};
+
+export default function App() {
+  useEffect(() => {
+    loadFonts(ALL_FONTS);
+  }, []);
+
+  return (
+    <div>
+      <div
+        className="w-full h-fit bg-background text-foreground h-fit min-h-screen w-screen min-w-screen max-w-screen overflow-visible"
+        data-id="3830b7ff-18e3-43d4-9f35-726c5fbdd2b1"
+      >
+        <div
+          className="flex h-screen"
+          data-id="a00df8d6-773c-4ef3-9b09-f69f09ed1585"
+        >
+          <aside
+            className="w-64 bg-sidebar border-r border-sidebarBorder flex flex-col"
+            data-id="07000464-f5a0-41bd-9f73-6bfb00f49a25"
+          >
+            <div
+              className="p-6 border-b border-sidebarBorder"
+              data-id="5af5daed-a28e-427c-ac9f-1f79b77be560"
+            >
+              <div
+                className="flex items-center gap-2"
+                data-id="3c7db6aa-b99e-4e3f-8e22-d47bca46825f"
+              >
+                <Scale
+                  className="size-8 text-sidebarPrimary"
+                  data-id="1ea0f2cf-dff8-4232-914c-c549715fe270"
+                />
+                <span
+                  className="font-semibold text-lg text-sidebarForeground"
+                  data-id="aaa9ac6f-5cb6-415c-a3a1-bcd653b7506b"
+                >
+                  LegalDraft
+                </span>
+              </div>
+            </div>
+            <nav
+              className="flex flex-col gap-1 p-4"
+              data-id="6655eee1-05d7-44d1-9ff7-687e3af21d58"
+            >
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sidebarForeground hover:bg-sidebarAccent hover:text-sidebarAccentForeground"
+                data-id="8bd518c5-00ea-4968-9b9d-12385946261b"
+              >
+                <LayoutDashboard
+                  className="size-4"
+                  data-id="05d6c3eb-8184-4081-ad27-fc415fbda7bb"
+                />
+                <span data-id="d49286b4-3e92-4e4a-9bcc-8a4cf2c6cb82">
+                  Dashboard
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sidebarForeground hover:bg-sidebarAccent hover:text-sidebarAccentForeground"
+                data-id="7ba0b1a1-a54d-41f2-bf83-25e99e074552"
+              >
+                <FileText
+                  className="size-4"
+                  data-id="24ea9209-45a6-4712-b429-76742000ce85"
+                />
+                <span data-id="5dc4927d-9935-4bd4-bd0a-7c3ae778b5af">
+                  Notices
+                </span>
+              </Button>
+              <Button
+                variant="default"
+                className="w-full justify-start gap-2 bg-sidebarPrimary text-sidebarPrimaryForeground hover:bg-sidebarPrimary/90"
+                data-id="c741a194-4fcf-42b9-ad7b-50d0e0666af6"
+              >
+                <PenTool
+                  className="size-4"
+                  data-id="5b33e09e-ed3f-4d72-8f62-2635375773e1"
+                />
+                <span data-id="69634b87-8eba-4628-9382-5df712d346f5">
+                  Drafting
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sidebarForeground hover:bg-sidebarAccent hover:text-sidebarAccentForeground"
+                data-id="ce84d415-24f9-4855-86ac-ff703000c116"
+              >
+                <Scale
+                  className="size-4"
+                  data-id="d93842d5-68c9-42c6-8e91-d44730a7577a"
+                />
+                <span data-id="6f59b983-a28a-46ca-98a2-696f5f2f496f">
+                  Appeals
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sidebarForeground hover:bg-sidebarAccent hover:text-sidebarAccentForeground"
+                data-id="75cb6d2b-d054-428b-af8d-5e6a927c4ae3"
+              >
+                <AlertTriangle
+                  className="size-4"
+                  data-id="b64a45db-8e6c-4bec-8515-97047d85a1bb"
+                />
+                <span data-id="9ecaa7e9-a538-4e88-b984-3f7f27e1a988">
+                  Risk Intelligence
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sidebarForeground hover:bg-sidebarAccent hover:text-sidebarAccentForeground"
+                data-id="3ce5a975-002f-44da-9007-96cd81597a20"
+              >
+                <Users
+                  className="size-4"
+                  data-id="962943d4-3113-4066-ba02-5bc9a8a0ec69"
+                />
+                <span data-id="8acd678b-e8d8-4203-b9ee-e0209ee7d385">
+                  Clients
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sidebarForeground hover:bg-sidebarAccent hover:text-sidebarAccentForeground"
+                data-id="ae115c78-5f77-4f53-a944-c9fc744af149"
+              >
+                <History
+                  className="size-4"
+                  data-id="350a441e-0a71-4dd1-8aa1-f3ceb064a704"
+                />
+                <span data-id="2e68f461-e6ad-4c52-a1a6-d4b5f1d49fcd">
+                  Audit Logs
+                </span>
+              </Button>
+            </nav>
+          </aside>
+          <main
+            className="flex-1 overflow-auto"
+            data-id="ba4bde2d-e1b9-4284-834e-6cca486156d8"
+          >
+            <div
+              className="p-8 gap-6 flex flex-col"
+              data-id="347dd2b8-d0e2-427a-a06d-e75dbb7b7f6d"
+            >
+              <div
+                className="flex items-center justify-between"
+                data-id="d8dedad3-70bd-46a2-8a85-3dadbacfdab1"
+              >
+                <div
+                  className="gap-2 flex flex-col"
+                  data-id="00da4dbf-b288-4b7a-be72-f359d804aa91"
+                >
+                  <h1
+                    className="text-3xl font-bold text-foreground"
+                    data-id="d306e071-4d98-4ebb-bce7-dc90145c82cf"
+                  >
+                    Draft Preview &amp; Export
+                  </h1>
+                  <p
+                    className="text-muted-foreground"
+                    data-id="f8947486-448e-4bbf-8240-48d785cd26b8"
+                  >
+                    Review and export your legal draft document
+                  </p>
+                </div>
+                <div
+                  className="flex gap-2"
+                  data-id="0589180a-2575-4a5a-b81b-08de975d115b"
+                >
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    data-id="a0e2bb7c-a700-46fa-9f83-087b43fd4d22"
+                  >
+                    <Mail
+                      className="size-4"
+                      data-id="014e6f60-0276-458f-9ac6-877d77d4f685"
+                    />
+                    <span data-id="3d682693-6f40-4168-8ae5-80195111082c">
+                      Email Draft
+                    </span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    data-id="6e0db0ae-4cb2-4dce-8f37-def413d6fcb1"
+                  >
+                    <Printer
+                      className="size-4"
+                      data-id="a043adfd-e4b7-4945-9eaa-ab938a0b2bd0"
+                    />
+                    <span data-id="461300b1-2746-425f-a51b-dab27ffb9446">
+                      Print Preview
+                    </span>
+                  </Button>
+                  <Button
+                    className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                    data-id="36c41552-c02e-4147-a3a7-ce624d1d5cdf"
+                  >
+                    <Download
+                      className="size-4"
+                      data-id="080de16c-750a-460e-bc03-4cd0d8d21e2d"
+                    />
+                    <span data-id="efacdc4a-6eb4-4bf5-a0c0-31e855d2f9ed">
+                      Export to Word (.docx)
+                    </span>
+                  </Button>
+                </div>
+              </div>
+              <div
+                className="flex gap-6"
+                data-id="4d91fb8f-012a-4f72-95f2-71f89696f5d9"
+              >
+                <div
+                  className="flex-1 gap-6 flex flex-col"
+                  data-id="f4abd2a4-a75a-4457-b3c5-c73971528c90"
+                >
+                  <Card
+                    className="p-6 gap-4"
+                    data-id="5f4f87af-868c-4627-b419-69c12702bc0f"
+                  >
+                    <CardHeader
+                      className="gap-2 p-0"
+                      data-id="c2719a9c-771b-484f-b514-fcbf3c692848"
+                    >
+                      <div
+                        className="flex items-start justify-between"
+                        data-id="a4c01df6-448c-4235-ac0d-e76fc99da462"
+                      >
+                        <div
+                          className="gap-1 flex flex-col"
+                          data-id="9f5cf203-7619-46c3-878d-398160743892"
+                        >
+                          <h2
+                            className="text-xl font-semibold text-foreground"
+                            data-id="9f6e1f97-0c28-4cd6-8332-e3305e8d9267"
+                          >
+                            Document Preview
+                          </h2>
+                          <p
+                            className="text-sm text-muted-foreground"
+                            data-id="2f299b8f-8692-47cd-9bb0-1ab11f0430f2"
+                          >
+                            Civil Appeal No. 2024/CA/1847
+                          </p>
+                        </div>
+                        <div
+                          className="flex gap-2"
+                          data-id="1dccc820-ea68-4781-8dc1-959c54ecbed7"
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            data-id="c703e636-da3c-43c0-95bc-c7cf9a1fc046"
+                          >
+                            <Edit
+                              className="size-4"
+                              data-id="63e873ed-39bf-44ea-98fe-f300f827edfd"
+                            />
+                            <span data-id="e3f0f7a1-4329-4828-ac48-63a6f89b0c56">
+                              Edit
+                            </span>
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent
+                      className="gap-4 p-0 flex flex-col"
+                      data-id="fb659742-8546-410b-890b-3ad35462b7a5"
+                    >
+                      <div
+                        className="border border-border rounded-lg p-8 bg-card gap-6 flex flex-col"
+                        data-id="a7236197-1024-4d2e-a263-7bed678b023c"
+                      >
+                        <div
+                          className="flex items-start justify-between border-b border-border pb-4"
+                          data-id="1dff6762-f2e6-4597-ae83-e80a3f9bde6d"
+                        >
+                          <div
+                            className="gap-1 flex flex-col"
+                            data-id="c299c3f5-09f3-4f13-8f93-428f64618874"
+                          >
+                            <h3
+                              className="text-lg font-bold text-foreground"
+                              data-id="c4b814b8-b68c-4f1e-9d3e-7dc86d6e5585"
+                            >
+                              CHAMBERS &amp; ASSOCIATES
+                            </h3>
+                            <p
+                              className="text-sm text-muted-foreground"
+                              data-id="f0423cd6-43f4-49eb-a9bf-ab1c297a81ce"
+                            >
+                              Advocates &amp; Legal Consultants
+                            </p>
+                            <p
+                              className="text-sm text-muted-foreground"
+                              data-id="c48add59-9508-4238-a6b3-5098f85d4fd9"
+                            >
+                              123 Legal Plaza, Supreme Court Road
+                            </p>
+                            <p
+                              className="text-sm text-muted-foreground"
+                              data-id="4d8ae218-b8f6-487f-acbe-0cde52859d4a"
+                            >
+                              New Delhi - 110001
+                            </p>
+                          </div>
+                          <div
+                            className="text-right gap-1 flex flex-col"
+                            data-id="5e0b4025-7ca5-4f15-99fa-9010d42efd78"
+                          >
+                            <p
+                              className="text-sm text-muted-foreground"
+                              data-id="73126a3f-1013-4cbb-b6f4-506cbe50d999"
+                            >
+                              Date: March 15, 2024
+                            </p>
+                            <p
+                              className="text-sm text-muted-foreground"
+                              data-id="3d9afaca-d319-4b3a-a775-4a115b83dd55"
+                            >
+                              Ref: CA/2024/1847
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          className="gap-4 flex flex-col"
+                          data-id="7d43ad3e-902e-4d87-94ea-2af13301969b"
+                        >
+                          <div
+                            className="gap-2 flex flex-col"
+                            data-id="1b477496-2f39-460e-ad90-e9f911a16082"
+                          >
+                            <h4
+                              className="font-semibold text-foreground flex items-center gap-2"
+                              data-id="2c3c2b1c-da9c-4cef-85eb-b36799284353"
+                            >
+                              <FileText
+                                className="size-4 text-primary"
+                                data-id="b5b59ee4-dd76-4171-876c-b5e34bb2946b"
+                              />
+                              <span data-id="ac75bed3-165c-4c47-b565-2419c049879c">
+                                1. INTRODUCTION
+                              </span>
+                            </h4>
+                            <p
+                              className="text-sm text-foreground leading-relaxed pl-6"
+                              data-id="41afc871-f232-4ab5-9db1-d0940189b91c"
+                            >
+                              This Civil Appeal is filed under Section 96 of the
+                              Code of Civil Procedure, 1908 against the judgment
+                              and decree dated January 10, 2024 passed by the
+                              District Court in Civil Suit No. 456/2023. The
+                              Appellant respectfully submits this appeal
+                              challenging the findings of the learned trial
+                              court on both questions of law and fact.
+                            </p>
+                          </div>
+                          <div
+                            className="gap-2 flex flex-col"
+                            data-id="6a138236-9f99-4742-bc1d-13a6fc7219a4"
+                          >
+                            <h4
+                              className="font-semibold text-foreground flex items-center gap-2"
+                              data-id="9cc08c9e-0252-4bac-9090-5cc889700378"
+                            >
+                              <List
+                                className="size-4 text-primary"
+                                data-id="c726bb5b-78c9-4439-8b44-38a4b84a8d7f"
+                              />
+                              <span data-id="f7b4dc89-65ea-464a-ae59-d532aaa651f3">
+                                2. FACTS SUMMARY
+                              </span>
+                            </h4>
+                            <p
+                              className="text-sm text-foreground leading-relaxed pl-6"
+                              data-id="43d81d6d-9007-4f5f-b6d1-96d9da1312f8"
+                            >
+                              The Appellant entered into a Sale Agreement dated
+                              March 1, 2023 with the Respondent for the purchase
+                              of property bearing No. 45, Green Park Extension.
+                              The Appellant paid an advance of Rs. 50,00,000/-
+                              as earnest money. The Respondent failed to execute
+                              the sale deed within the stipulated time period of
+                              90 days despite repeated requests and notices. The
+                              trial court erroneously dismissed the suit for
+                              specific performance filed by the Appellant.
+                            </p>
+                          </div>
+                          <div
+                            className="gap-2 flex flex-col"
+                            data-id="1cc59a74-ccf1-4759-9bb6-3a3daf085029"
+                          >
+                            <h4
+                              className="font-semibold text-foreground flex items-center gap-2"
+                              data-id="d351b768-2dc0-497f-bf66-fc2636b632fd"
+                            >
+                              <Scale
+                                className="size-4 text-primary"
+                                data-id="1fb86731-a3b5-4e70-8062-21ee680d2f84"
+                              />
+                              <span data-id="1a7bc4ee-a42c-4eed-adac-447900faab77">
+                                3. LEGAL POSITION
+                              </span>
+                            </h4>
+                            <div
+                              className="text-sm text-foreground leading-relaxed pl-6 gap-2 flex flex-col"
+                              data-id="a015b1e0-f0e9-4aad-85f5-4d0ff84ba8f6"
+                            >
+                              <p data-id="ddb6c52d-e342-4d25-85d1-17ff99544a87">
+                                The Appellant submits that the impugned judgment
+                                is contrary to the settled legal position on the
+                                following grounds:
+                              </p>
+                              <p
+                                className="font-medium"
+                                data-id="ccad4564-54b3-4c20-b7d7-3925e7bdc8e6"
+                              >
+                                3.1 Specific Performance Act, 1963
+                              </p>
+                              <p
+                                className="pl-4"
+                                data-id="54056a0e-1187-4a89-be52-c34878f30c00"
+                              >
+                                Section 10 of the Specific Performance Act, 1963
+                                clearly provides for specific performance of
+                                contracts. The trial court failed to appreciate
+                                that all conditions precedent were fulfilled by
+                                the Appellant.
+                              </p>
+                              <p
+                                className="font-medium"
+                                data-id="f89d08cc-0f77-4253-af0e-a8d7d0216fd8"
+                              >
+                                3.2 Contract Act, 1872
+                              </p>
+                              <p
+                                className="pl-4"
+                                data-id="2efc8d10-c8cc-4596-8125-ee11e5fc80d5"
+                              >
+                                Section 73 of the Indian Contract Act provides
+                                for compensation for breach of contract. The
+                                Respondent's failure to perform constitutes a
+                                clear breach entitling the Appellant to relief.
+                              </p>
+                            </div>
+                          </div>
+                          <div
+                            className="gap-2 flex flex-col"
+                            data-id="e418a16b-2f52-4132-becc-a4a2bae09263"
+                          >
+                            <h4
+                              className="font-semibold text-foreground flex items-center gap-2"
+                              data-id="ab622c33-8da2-4cba-b0e0-9ae2242a72f4"
+                            >
+                              <BookOpen
+                                className="size-4 text-primary"
+                                data-id="2ad742f0-f7ee-4d7f-b2b7-4391504b7360"
+                              />
+                              <span data-id="fd842ce8-d90f-4437-a432-32daaf734f50">
+                                4. PRAYER
+                              </span>
+                            </h4>
+                            <p
+                              className="text-sm text-foreground leading-relaxed pl-6"
+                              data-id="84e0600e-6d5f-4280-8e5b-3148e6ae1e20"
+                            >
+                              In light of the above submissions, it is most
+                              respectfully prayed that this Hon'ble Court may be
+                              pleased to:
+                            </p>
+                            <ul
+                              className="text-sm text-foreground leading-relaxed pl-12 list-disc gap-1 flex flex-col"
+                              data-id="5240fcd3-7d03-4675-9029-bf4af1d4dc41"
+                            >
+                              <li data-id="d4521ac8-acba-4daf-b00a-f67f4ade943e">
+                                Set aside the impugned judgment and decree dated
+                                January 10, 2024
+                              </li>
+                              <li data-id="b05d6e89-fb50-496f-8cbb-74474a01a8ab">
+                                Grant decree for specific performance of the
+                                Sale Agreement dated March 1, 2023
+                              </li>
+                              <li data-id="18534b0f-b837-4582-9c50-a8ccf38b4918">
+                                Award costs of this appeal to the Appellant
+                              </li>
+                              <li data-id="9e6049f1-9d11-4a12-8fbf-5d7e4695545e">
+                                Pass any other order as this Hon'ble Court may
+                                deem fit in the interest of justice
+                              </li>
+                            </ul>
+                          </div>
+                          <div
+                            className="gap-2 flex flex-col border-t border-border pt-4"
+                            data-id="38ccab75-ba28-48ed-994b-6e2f820ff4af"
+                          >
+                            <h4
+                              className="font-semibold text-foreground flex items-center gap-2"
+                              data-id="6ac6cd96-a7d4-47e2-8d67-31676bcd7e40"
+                            >
+                              <PenTool
+                                className="size-4 text-primary"
+                                data-id="f8e00881-6837-4f40-999d-995565969c13"
+                              />
+                              <span data-id="5c873b28-aff4-4257-83e5-0fa3520fecd3">
+                                5. SIGNATURE BLOCK
+                              </span>
+                            </h4>
+                            <div
+                              className="text-sm text-foreground leading-relaxed pl-6 gap-4 flex flex-col"
+                              data-id="cd4130e1-dfb1-46d8-8c3f-c6b8eb40fc2b"
+                            >
+                              <div
+                                className="flex justify-between items-end"
+                                data-id="e4e4d601-d842-4b9e-a757-e61b208e86c8"
+                              >
+                                <div
+                                  className="gap-1 flex flex-col"
+                                  data-id="e2a980b9-6173-4882-8776-e64ae1874b6a"
+                                >
+                                  <p
+                                    className="font-medium"
+                                    data-id="2d5a6139-c613-491b-a086-f9c8b32743ea"
+                                  >
+                                    Advocate for the Appellant
+                                  </p>
+                                  <p
+                                    className="text-muted-foreground"
+                                    data-id="dece63fd-2cae-4b13-8cb8-a180884ef50f"
+                                  >
+                                    Enrollment No: D/1234/2010
+                                  </p>
+                                </div>
+                                <div
+                                  className="text-right gap-1 flex flex-col"
+                                  data-id="5cdb3bdc-b0a0-4e5e-b575-e9cba992232e"
+                                >
+                                  <p
+                                    className="font-medium"
+                                    data-id="b53875ca-ce31-4b18-9fa4-e15fbfe35ec2"
+                                  >
+                                    Senior Advocate
+                                  </p>
+                                  <p
+                                    className="text-muted-foreground"
+                                    data-id="efd467a3-dda9-41f3-8958-16c63ef1f0e2"
+                                  >
+                                    Enrollment No: D/567/1995
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2 w-fit"
+                                data-id="c8d28591-b785-4511-a24c-6c73fbc5ba0a"
+                              >
+                                <Edit
+                                  className="size-4"
+                                  data-id="b416d5d2-c076-443f-b548-b8c7c2f83258"
+                                />
+                                <span data-id="26641825-b13f-47f0-a53f-91c4796ed4ce">
+                                  Edit Signature Block
+                                </span>
+                              </Button>
+                            </div>
+                          </div>
+                          <div
+                            className="gap-2 flex flex-col border-t border-border pt-4"
+                            data-id="a791f6c3-322e-45f3-945d-1676651b96ae"
+                          >
+                            <h4
+                              className="font-semibold text-foreground flex items-center gap-2"
+                              data-id="5b6f20d1-e5b9-4621-92da-2f97716029bd"
+                            >
+                              <Paperclip
+                                className="size-4 text-primary"
+                                data-id="cb4dfd85-f68d-41fd-a4af-b9797360fcfc"
+                              />
+                              <span data-id="08ac6aa2-7649-4f10-9b67-cfc983b70688">
+                                6. ANNEXURES
+                              </span>
+                            </h4>
+                            <div
+                              className="text-sm text-foreground leading-relaxed pl-6 gap-2 flex flex-col"
+                              data-id="5fdd52bd-10ab-48c3-a268-c3594222e031"
+                            >
+                              <p data-id="e8ec774a-26b4-4f22-87a5-942f48fa6697">
+                                Annexure A-1: Copy of Sale Agreement dated March
+                                1, 2023
+                              </p>
+                              <p data-id="57a9fa23-2c07-4358-8e33-213b1993a093">
+                                Annexure A-2: Receipt of earnest money payment
+                              </p>
+                              <p data-id="7a1b51f3-9e8c-4f89-a322-5e18cc318e0b">
+                                Annexure A-3: Legal notices dated May 15, 2023
+                                and June 20, 2023
+                              </p>
+                              <p data-id="5b9150a4-ec08-4382-8523-80d6e5d40ffb">
+                                Annexure A-4: Impugned judgment and decree dated
+                                January 10, 2024
+                              </p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2 w-fit"
+                                data-id="b53b6655-5f45-4d08-9777-8fef7268634b"
+                              >
+                                <Plus
+                                  className="size-4"
+                                  data-id="53af98bc-41b4-4e74-890c-a124ed0cb45a"
+                                />
+                                <span data-id="fc8764ef-dec4-4aa2-82bb-681452322b1b">
+                                  Add Annexure
+                                </span>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card
+                    className="p-6 gap-4"
+                    data-id="d2b8cb25-2eb2-4987-acbb-446154309f53"
+                  >
+                    <CardHeader
+                      className="gap-2 p-0"
+                      data-id="6e3ea0d4-a87c-476c-9e5e-adb3af7a50f2"
+                    >
+                      <h3
+                        className="text-lg font-semibold text-foreground"
+                        data-id="d779eb48-756d-4f01-85c5-831fdcdec553"
+                      >
+                        Export Options
+                      </h3>
+                    </CardHeader>
+                    <CardContent
+                      className="gap-4 p-0 flex flex-col"
+                      data-id="b1561445-d452-4d2e-a9d2-cd4a3430dd34"
+                    >
+                      <div
+                        className="gap-2 flex flex-col"
+                        data-id="d790c459-8b80-4c4d-9612-55bdb56d1cd9"
+                      >
+                        <label
+                          className="text-sm font-medium text-foreground"
+                          data-id="ea9fea21-5498-47ec-8618-c52be56bf565"
+                        >
+                          Document Format
+                        </label>
+                        <div
+                          className="flex gap-2"
+                          data-id="37fbdf37-23fb-4eb1-9e0e-bfc7db6a8358"
+                        >
+                          <Button
+                            variant="outline"
+                            className="flex-1 gap-2"
+                            data-id="216a3e63-f233-40d9-a9d2-7d321db4828d"
+                          >
+                            <FileText
+                              className="size-4"
+                              data-id="96decb5b-d985-4e95-ae88-eaaf97cb936a"
+                            />
+                            <span data-id="a8ba5c03-99fc-4a6b-a152-31f00ef8dbcc">
+                              .docx
+                            </span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-1 gap-2"
+                            data-id="6b409043-16ec-4683-9705-5fce1c5ca657"
+                          >
+                            <File
+                              className="size-4"
+                              data-id="e266708a-9084-4ecb-9fa8-21bb56ee81e0"
+                            />
+                            <span data-id="8c452067-7406-41aa-820f-767065cd3cdb">
+                              .pdf
+                            </span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-1 gap-2"
+                            data-id="338e865b-870c-44c2-a272-de6d178f72f2"
+                          >
+                            <FileType
+                              className="size-4"
+                              data-id="8f0a990d-6921-457e-a9ae-2397706f0596"
+                            />
+                            <span data-id="4849c04d-309e-44aa-88d7-ef8efcbc92ab">
+                              .rtf
+                            </span>
+                          </Button>
+                        </div>
+                      </div>
+                      <div
+                        className="gap-2 flex flex-col"
+                        data-id="9c4ac6a4-2fd9-4ce6-a2e4-6b944c5c0012"
+                      >
+                        <label
+                          className="text-sm font-medium text-foreground"
+                          data-id="1e66ad08-31de-4ea7-8438-065578b5f1e7"
+                        >
+                          Page Settings
+                        </label>
+                        <div
+                          className="flex gap-2"
+                          data-id="49874708-85fb-46b3-8086-ba8ca513ff71"
+                        >
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            data-id="58469937-f302-4778-8e5f-b1b1f0ce648f"
+                          >
+                            A4
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            data-id="a9f9104b-21b5-4f27-a4fb-e88a84bdc08c"
+                          >
+                            Letter
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            data-id="c0369b41-77af-4781-b333-ea192e05ee53"
+                          >
+                            Legal
+                          </Button>
+                        </div>
+                      </div>
+                      <div
+                        className="gap-2 flex flex-col"
+                        data-id="2495cd44-518b-4b23-b85a-015de1aa6652"
+                      >
+                        <label
+                          className="text-sm font-medium text-foreground"
+                          data-id="21a2d416-fcae-4ffb-b958-81a26cea4391"
+                        >
+                          Include
+                        </label>
+                        <div
+                          className="flex flex-col gap-2"
+                          data-id="7025e998-6261-43f1-8aac-1bf8839af010"
+                        >
+                          <div
+                            className="flex items-center gap-2"
+                            data-id="7717c226-e791-4834-82d9-f652f9890d13"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={true}
+                              className="size-4"
+                              data-id="1556a544-b49a-4284-9ac5-71a03dc9a106"
+                            />
+                            <span
+                              className="text-sm text-foreground"
+                              data-id="f9a5f05e-529c-4bf3-9ebc-730aef92a721"
+                            >
+                              Cover page
+                            </span>
+                          </div>
+                          <div
+                            className="flex items-center gap-2"
+                            data-id="346672d8-efe7-4946-87ea-c131ae4beaca"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={true}
+                              className="size-4"
+                              data-id="a2d6532b-b286-4da3-98df-42b43b70e04d"
+                            />
+                            <span
+                              className="text-sm text-foreground"
+                              data-id="9181ce58-923a-4d9b-b851-2945ea57a6cf"
+                            >
+                              Table of contents
+                            </span>
+                          </div>
+                          <div
+                            className="flex items-center gap-2"
+                            data-id="3deb3d8a-51cd-4032-adf7-1bc8c3d69c3e"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={true}
+                              className="size-4"
+                              data-id="ab46c63e-26fa-491a-9772-a641ab4bae9f"
+                            />
+                            <span
+                              className="text-sm text-foreground"
+                              data-id="ee285f80-485f-4a31-b319-cbcdfa147454"
+                            >
+                              Annexures
+                            </span>
+                          </div>
+                          <div
+                            className="flex items-center gap-2"
+                            data-id="1d4c4a5f-3980-4941-83ef-de9ae3ed075b"
+                          >
+                            <input
+                              type="checkbox"
+                              className="size-4"
+                              data-id="e97eade7-fb49-4d8a-9320-5218885c9c86"
+                            />
+                            <span
+                              className="text-sm text-foreground"
+                              data-id="aab4e9c0-3ffb-440c-96d0-5f77bf10e1f7"
+                            >
+                              Watermark
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div
+                  className="w-80 gap-6 flex flex-col"
+                  data-id="61566ff8-4d89-4430-a56d-bdb5a44bdf1d"
+                >
+                  <Card
+                    className="p-6 gap-4"
+                    data-id="d879ab16-e62e-442f-b526-61c011ebd99b"
+                  >
+                    <CardHeader
+                      className="gap-2 p-0"
+                      data-id="1d569110-b44e-4bac-a341-546ba042d290"
+                    >
+                      <h3
+                        className="text-lg font-semibold text-foreground"
+                        data-id="60ea110c-ce99-4892-85bb-25bfdbc5d329"
+                      >
+                        Document Metadata
+                      </h3>
+                    </CardHeader>
+                    <CardContent
+                      className="gap-4 p-0 flex flex-col"
+                      data-id="1cccc521-d3f3-4db4-8c6a-73984fd8d315"
+                    >
+                      <div
+                        className="gap-2 flex flex-col"
+                        data-id="a5486ae9-07ce-4c48-af84-8ebb43d01c6f"
+                      >
+                        <div
+                          className="flex items-center gap-2 text-sm"
+                          data-id="9eddd5eb-a420-4b88-a001-43adb7a2b89a"
+                        >
+                          <Calendar
+                            className="size-4 text-muted-foreground"
+                            data-id="46b91d16-9da9-453b-928f-70e4eb14c625"
+                          />
+                          <span
+                            className="text-muted-foreground"
+                            data-id="74c67030-4872-4550-87b8-53075a2fe414"
+                          >
+                            Created:
+                          </span>
+                          <span
+                            className="font-medium text-foreground"
+                            data-id="7d9004ad-03d1-4d1a-a5a5-73e1ed1057a1"
+                          >
+                            Mar 10, 2024
+                          </span>
+                        </div>
+                        <div
+                          className="flex items-center gap-2 text-sm"
+                          data-id="a83aedd3-8e08-4715-88a5-cadcd3a9f011"
+                        >
+                          <Clock
+                            className="size-4 text-muted-foreground"
+                            data-id="e234c6a0-256f-4f15-92f4-155bc030763f"
+                          />
+                          <span
+                            className="text-muted-foreground"
+                            data-id="9879fdca-e8dd-4b1e-8607-f5f934efc5f4"
+                          >
+                            Modified:
+                          </span>
+                          <span
+                            className="font-medium text-foreground"
+                            data-id="2302b5ad-18af-4253-aedf-ece7736a6909"
+                          >
+                            Mar 15, 2024
+                          </span>
+                        </div>
+                        <div
+                          className="flex items-center gap-2 text-sm"
+                          data-id="3b78dd02-8e64-4aa2-9ae9-6f2061509026"
+                        >
+                          <Hash
+                            className="size-4 text-muted-foreground"
+                            data-id="a89ac7c9-e332-4b9b-a5a2-08ef3ab48cd9"
+                          />
+                          <span
+                            className="text-muted-foreground"
+                            data-id="851818e0-4296-4317-ab85-1199026e982a"
+                          >
+                            Version:
+                          </span>
+                          <span
+                            className="font-medium text-foreground"
+                            data-id="823679c6-2d39-4839-94f7-e06cb30c8a84"
+                          >
+                            3.2
+                          </span>
+                        </div>
+                        <div
+                          className="flex items-center gap-2 text-sm"
+                          data-id="2dfdf44b-1858-45f0-92c6-34360f579ea3"
+                        >
+                          <User
+                            className="size-4 text-muted-foreground"
+                            data-id="9bab2858-bed6-4828-bce5-6551b8000f25"
+                          />
+                          <span
+                            className="text-muted-foreground"
+                            data-id="dd9f26c3-b355-4a0d-aca6-707f442d0db7"
+                          >
+                            Author:
+                          </span>
+                          <span
+                            className="font-medium text-foreground"
+                            data-id="9f3fbed4-b3a8-4543-9c80-763032de0d56"
+                          >
+                            A. Sharma
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card
+                    className="p-6 gap-4"
+                    data-id="b5b5e0c1-4f0c-4f76-8127-664beea68308"
+                  >
+                    <CardHeader
+                      className="gap-2 p-0"
+                      data-id="1e6d50d2-60a1-4d85-9c0f-cb434f62e310"
+                    >
+                      <h3
+                        className="text-lg font-semibold text-foreground"
+                        data-id="fcb2660d-c69c-4e48-806d-1a172e2ef287"
+                      >
+                        Version History
+                      </h3>
+                    </CardHeader>
+                    <CardContent
+                      className="gap-3 p-0 flex flex-col"
+                      data-id="14867385-86ae-4337-bf49-fba8ad70761b"
+                    >
+                      <div
+                        className="gap-2 flex flex-col pb-3 border-b border-border"
+                        data-id="b2262359-b358-4ae9-b737-a5206d1395fb"
+                      >
+                        <div
+                          className="flex items-center justify-between"
+                          data-id="d6be8c03-cf79-467e-a607-11116209a075"
+                        >
+                          <span
+                            className="text-sm font-medium text-foreground"
+                            data-id="717a3739-14ac-42d7-87d7-9154b18de9ef"
+                          >
+                            Version 3.2
+                          </span>
+                          <span
+                            className="text-xs text-muted-foreground"
+                            data-id="2d0d95d0-f587-46ad-92b4-84c90fee7753"
+                          >
+                            Current
+                          </span>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="45b0a924-570e-44b2-ae61-72319f563ff0"
+                        >
+                          Added annexures section
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="f0001f97-ef74-4c85-ba6f-ab47a0b3f2db"
+                        >
+                          Mar 15, 2024 at 2:30 PM
+                        </p>
+                      </div>
+                      <div
+                        className="gap-2 flex flex-col pb-3 border-b border-border"
+                        data-id="f1fd9bc0-8e0a-4c0c-91f7-b79be03ee762"
+                      >
+                        <div
+                          className="flex items-center justify-between"
+                          data-id="b2af98c3-c820-4ae1-8ed0-6dc78f6d3e36"
+                        >
+                          <span
+                            className="text-sm font-medium text-foreground"
+                            data-id="cd5eb4ce-8bf8-4489-967e-7806a4b407e2"
+                          >
+                            Version 3.1
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            data-id="9dcb0363-add2-4df6-8dd0-e6783ca3e869"
+                          >
+                            Restore
+                          </Button>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="f4c9725d-0b1a-462b-b124-c992e8894b57"
+                        >
+                          Updated legal position
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="78f137c6-53c0-45fa-b967-7eef4bfe75cd"
+                        >
+                          Mar 14, 2024 at 4:15 PM
+                        </p>
+                      </div>
+                      <div
+                        className="gap-2 flex flex-col pb-3 border-b border-border"
+                        data-id="2a90bba1-3f9b-41e8-b392-c17251620630"
+                      >
+                        <div
+                          className="flex items-center justify-between"
+                          data-id="41519ab2-3669-4a25-b1c6-76f185b300bc"
+                        >
+                          <span
+                            className="text-sm font-medium text-foreground"
+                            data-id="c48b4b9f-94e6-47f4-ad4d-82cb3affb99f"
+                          >
+                            Version 3.0
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            data-id="02dcc675-d164-47a2-8bf8-52193c7a57d7"
+                          >
+                            Restore
+                          </Button>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="3890e2d4-1cac-416d-beba-0ba718dea5a9"
+                        >
+                          Revised facts summary
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="8b6a929e-252b-47aa-955d-af7506805a58"
+                        >
+                          Mar 13, 2024 at 11:00 AM
+                        </p>
+                      </div>
+                      <div
+                        className="gap-2 flex flex-col"
+                        data-id="590168ac-a936-48d7-b69f-cc6eb8c4b73f"
+                      >
+                        <div
+                          className="flex items-center justify-between"
+                          data-id="2286865f-360c-4a44-8326-9a6ef86bd8c1"
+                        >
+                          <span
+                            className="text-sm font-medium text-foreground"
+                            data-id="bba5cae7-1cb3-42a3-8f35-858df2269727"
+                          >
+                            Version 2.0
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            data-id="b6893894-3ba4-40b5-80e9-d005011600a7"
+                          >
+                            Restore
+                          </Button>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="26269d5f-9c08-41a1-be72-d455e2727b3f"
+                        >
+                          Initial draft completion
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="895199df-b77f-4e2d-b922-157e10d155d4"
+                        >
+                          Mar 11, 2024 at 9:45 AM
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card
+                    className="p-6 gap-4"
+                    data-id="f6831920-2819-44b4-b1d8-da48343cd98d"
+                  >
+                    <CardHeader
+                      className="gap-2 p-0"
+                      data-id="01e7af54-b9a1-4410-bf25-52e640ea6813"
+                    >
+                      <h3
+                        className="text-lg font-semibold text-foreground"
+                        data-id="d5c9c270-0822-406d-b07c-22785e398e26"
+                      >
+                        Edit History
+                      </h3>
+                    </CardHeader>
+                    <CardContent
+                      className="gap-3 p-0 flex flex-col"
+                      data-id="90fb12f5-03f5-4678-89cb-1141412a4564"
+                    >
+                      <div
+                        className="gap-1 flex flex-col pb-3 border-b border-border"
+                        data-id="f9cce10a-ea54-4e25-a03c-2fea484644f1"
+                      >
+                        <div
+                          className="flex items-center gap-2"
+                          data-id="721c5f08-370c-454c-967b-c6cec9ad8a95"
+                        >
+                          <User
+                            className="size-3 text-muted-foreground"
+                            data-id="62dbb4c9-f00e-4412-b948-ec08eb318d6b"
+                          />
+                          <span
+                            className="text-xs font-medium text-foreground"
+                            data-id="bf52e092-f8af-4b7d-b10a-eefb139f164a"
+                          >
+                            A. Sharma
+                          </span>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="b593e2c7-49ec-46b8-8b97-164eab1f49b8"
+                        >
+                          Edited signature block
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="0c8403e9-f72c-4438-919c-666a81fb02bf"
+                        >
+                          15 minutes ago
+                        </p>
+                      </div>
+                      <div
+                        className="gap-1 flex flex-col pb-3 border-b border-border"
+                        data-id="48acbf57-dc3f-458e-b786-7c450bba7981"
+                      >
+                        <div
+                          className="flex items-center gap-2"
+                          data-id="f595b51d-cd67-4bcf-85be-ee6ab8f8eb6d"
+                        >
+                          <User
+                            className="size-3 text-muted-foreground"
+                            data-id="1887443b-6541-40da-b088-a47908f8f6c0"
+                          />
+                          <span
+                            className="text-xs font-medium text-foreground"
+                            data-id="c342b597-2de7-4928-a5a9-0b4ce20bb8db"
+                          >
+                            R. Patel
+                          </span>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="28d83a99-df78-4bb5-aac4-4cd81473035a"
+                        >
+                          Added annexure A-4
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="6d5ca739-51ec-4cd3-ab0c-09c66feb5e72"
+                        >
+                          2 hours ago
+                        </p>
+                      </div>
+                      <div
+                        className="gap-1 flex flex-col"
+                        data-id="1dcb4071-20da-45b6-a69b-fbfe68f648bc"
+                      >
+                        <div
+                          className="flex items-center gap-2"
+                          data-id="8341d962-c335-4736-842e-8fa65df04d78"
+                        >
+                          <User
+                            className="size-3 text-muted-foreground"
+                            data-id="a61314a3-654e-45fc-98b9-551c225a0b3d"
+                          />
+                          <span
+                            className="text-xs font-medium text-foreground"
+                            data-id="cf544fb6-c166-43ee-88a6-f08ce9ec1b5c"
+                          >
+                            A. Sharma
+                          </span>
+                        </div>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="829eb7e5-1ed5-4fc9-ac9f-bdab0ad994a7"
+                        >
+                          Updated prayer section
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-id="6fd958f3-3d69-4cb1-88a8-5465553e1ed4"
+                        >
+                          Yesterday at 5:20 PM
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card
+                    className="p-6 gap-4"
+                    data-id="f103d788-d665-4492-9fdf-d2879f5ab028"
+                  >
+                    <CardHeader
+                      className="gap-2 p-0"
+                      data-id="ac0641bc-9f9f-48c9-ac07-f1501d2721cd"
+                    >
+                      <h3
+                        className="text-lg font-semibold text-foreground"
+                        data-id="962b7729-e47a-478a-8771-593f0f1f87c8"
+                      >
+                        Quick Actions
+                      </h3>
+                    </CardHeader>
+                    <CardContent
+                      className="gap-2 p-0 flex flex-col"
+                      data-id="f4552332-9b5a-4a5a-9393-ad02f6df16f1"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start gap-2"
+                        data-id="fa9ceed8-b0e0-40b8-9fd9-6c5b0c4a9325"
+                      >
+                        <Share2
+                          className="size-4"
+                          data-id="1a2f44a3-ff48-40ec-868e-39790cb8194b"
+                        />
+                        <span data-id="43bb2809-8255-46f4-9200-f980beffcf50">
+                          Share Draft
+                        </span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start gap-2"
+                        data-id="0a96cfb1-cfdf-48d1-8541-58ce8bc9f2e0"
+                      >
+                        <Copy
+                          className="size-4"
+                          data-id="5031b5f1-c3be-4fa0-9ba7-6df40274207f"
+                        />
+                        <span data-id="4e2e2cf9-9f17-419a-b66e-2cdde36c87d3">
+                          Duplicate
+                        </span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start gap-2"
+                        data-id="7d5250d3-a0e0-4bdd-a6ed-dd47b3c3cdd5"
+                      >
+                        <Archive
+                          className="size-4"
+                          data-id="68df0c17-b4c9-4e5a-89c5-98545b44dbe9"
+                        />
+                        <span data-id="c9b0185e-de65-4f1c-b55b-3e6d9dd19655">
+                          Archive
+                        </span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+                        data-id="c089dac8-5cf3-49dd-8323-751dd77161eb"
+                      >
+                        <Trash2
+                          className="size-4"
+                          data-id="6289c1b9-4053-4bc6-8a08-7331a7890333"
+                        />
+                        <span data-id="c166274e-fc9d-46e1-b336-06e64fde920b">
+                          Delete Draft
+                        </span>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}

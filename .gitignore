@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Env
+.env
+venv/
+.venv/
+
+# Docker
+*.log
+
+# VSCode
+.vscode/
+
+# Mac
+.DS_Store
+
+# Alembic cache
+alembic/versions/*.pyc
+
+# Data files
+*.csv
+*.xlsx
+*.docx
+
+# Database dumps
+*.sql
+demo_db_backup.sql
+taxcopilot_demo_dump.sql
+
+# Node dependencies
+node_modules/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Uploads / local data
+uploads/
+data/
+
+# ML Models 
+app/models/embedding_model/
