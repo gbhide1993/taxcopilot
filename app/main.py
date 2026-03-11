@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from dotenv import load_dotenv
 from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
 from app.models.user import User
 from app.dependencies.auth import get_current_user
 from app.routes import auth
@@ -91,7 +91,6 @@ def on_startup():
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         conn.commit()
 
-    
 
 
 @app.get("/protected")
@@ -102,3 +101,19 @@ def protected_route(current_user=Depends(get_current_user)):
         
     }
 
+@app.middleware("http")
+async def license_middleware(request: Request, call_next):
+    db = SessionLocal()
+    try:
+        check_license(db)
+    finally:
+        db.close()
+
+    response = await call_next(request)
+    return response
+
+@app.on_event("startup")
+def verify_license():
+    db = SessionLocal()
+    check_license(db)
+    db.close()

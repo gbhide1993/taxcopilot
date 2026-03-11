@@ -32,6 +32,8 @@ alembic/versions/*.pyc
 *.sql
 demo_db_backup.sql
 taxcopilot_demo_dump.sql
+backup.sql
+stable_post_assignment_fix.sql
 
 # Node dependencies
 node_modules/
