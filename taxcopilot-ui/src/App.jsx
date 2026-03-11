@@ -98,7 +98,7 @@ const LayoutWrapper = () => {
   <div style={{ display:"flex", alignItems:"center", gap:20 }}>
 
     <div style={{ color:"#666" }}>
-      Firm: ABC & Co.
+      Firm: Bhide & Associates
     </div>
 
     <span
