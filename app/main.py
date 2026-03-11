@@ -50,25 +50,25 @@ app.include_router(rag.router, dependencies=[Depends(check_license)])
 
 app.include_router(sections.router)
 
-app.include_router(drafts.router)
+app.include_router(drafts.router, dependencies=[Depends(check_license)])
 
-app.include_router(risk.router)
+app.include_router(risk.router, dependencies=[Depends(check_license)])
 
-app.include_router(dashboard.router)
+app.include_router(dashboard.router, dependencies=[Depends(check_license)])
 
-app.include_router(appeals.router)
+app.include_router(appeals.router, dependencies=[Depends(check_license)])
 
 app.include_router(settings.router)
 
-app.include_router(reports.router)
+app.include_router(reports.router, dependencies=[Depends(check_license)])
 
 app.include_router(reports_export.router)
 
-app.include_router(activity.router)
+app.include_router(activity.router, dependencies=[Depends(check_license)])
 
-app.include_router(deadlines.router)
+app.include_router(deadlines.router, dependencies=[Depends(check_license)])
 
-app.include_router(workload.router)
+app.include_router(workload.router, dependencies=[Depends(check_license)])
 
 app.include_router(sla.router)
 
