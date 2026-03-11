@@ -13,7 +13,7 @@
 
 Open terminal in the TaxCopilot folder and run:
 
-docker compose up -d
+`docker compose up -d`
 
 This will start:
 
@@ -30,7 +30,7 @@ Wait about **30–60 seconds** for all services to start.
 
 Run:
 
-docker exec -it taxcopilot_ollama ollama pull phi
+`docker exec -it taxcopilot_ollama ollama pull phi`
 
 This downloads the AI model (~1.6 GB).
 It only happens **once during first installation**.
@@ -41,7 +41,7 @@ It only happens **once during first installation**.
 
 Run:
 
-Get-Content taxcopilot_demo_dump.sql | docker exec -i taxcopilot_db psql -U postgres -d taxcopilot
+`Get-Content taxcopilot_demo_dump.sql | docker exec -i taxcopilot_db psql -U postgres -d taxcopilot`
 
 This loads demo clients and notices so you can explore the system.
 
